@@ -1,12 +1,24 @@
-import express from "express"
-import userRoutes from "../src/routes/user.routes"
-import { errorHandler } from "../src/middlewares/error.middleware"
+import express from "express";
+import cors from "cors";
+import apiRoutes from "./routes/index";
+import path from "path";
 
-const app = express()
+const app = express();
 
-app.use(express.json())
-app.use("/api/users", userRoutes)
+app.use(cors());
+app.use(express.json());
 
-app.use(errorHandler)
+// API ROUTES
+app.use("/api", apiRoutes);
 
-export default app
+// Health check
+app.get("/", (_req, res) => {
+  res.send("API is running");
+});
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+// 404 handler
+app.use((_req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+
+export default app;
