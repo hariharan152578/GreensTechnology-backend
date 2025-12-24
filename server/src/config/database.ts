@@ -6,6 +6,13 @@ import { Hero } from "../models/Hero.model";
 import { Enroll } from "../models/Enroll.model";
 import { EnrollCard } from "../models/EnrollCard.model";
 import { EnrollRequest } from "../models/EnrollRequest.model";
+import { About } from "../models/About.model";
+import { TrainerAbout } from "../models/TrainerAbout.model";
+import { CareerImpact } from "../models/CareerImpact.model";
+import { Certificate } from "../models/Certificate.model";
+import { Testimonial } from "../models/Testimonial.model";
+import { StudyMaterial } from "../models/StudyMaterial.model";
+import { StudentSuccess } from "../models/StudentSuccess.model";
 
 export const sequelize = new Sequelize({
   dialect: "mysql",
@@ -21,7 +28,14 @@ export const sequelize = new Sequelize({
     Course,
     Enroll,
     EnrollCard,
-    EnrollRequest, // ✅ REQUIRED
+    EnrollRequest,
+    About,
+    TrainerAbout,
+    CareerImpact,
+    Certificate,
+    Testimonial ,
+    StudyMaterial,
+    StudentSuccess  
   ],
   logging: false,
 });

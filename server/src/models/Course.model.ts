@@ -3,10 +3,7 @@ import {
   Column,
   Model,
   DataType,
-  ForeignKey,
-  BelongsTo,
 } from "sequelize-typescript";
-import { Domain } from "./Domain.model";
 
 @Table({ tableName: "courses" })
 export class Course extends Model {
@@ -17,16 +14,25 @@ export class Course extends Model {
   })
   id!: number;
 
-  @Column({ allowNull: false })
-  name!: string; // Docker, Kubernetes, Terraform
+  // 🔥 Domain Mapping
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  domainId!: number; // 0 = landing, 1 = DevOps, 2 = AI, etc.
 
   @Column({ allowNull: false })
-  slug!: string; // docker, kubernetes
+  title!: string;
 
-  @ForeignKey(() => Domain)
-  @Column
-  domainId!: number;
+  @Column({ type: DataType.TEXT, allowNull: false })
+  description!: string;
 
-  @BelongsTo(() => Domain)
-  domain!: Domain;
+  @Column({ allowNull: false })
+  image!: string;
+
+  @Column({ allowNull: false })
+  price!: string;
+
+  @Column({ allowNull: false })
+  duration!: string;
+
+  @Column({ defaultValue: true })
+  isActive!: boolean;
 }

@@ -7,18 +7,30 @@ import {
 } from "sequelize-typescript";
 import { EnrollCard } from "./EnrollCard.model";
 
-@Table({ tableName: "enroll_sections" })
+@Table({
+  tableName: "enroll_sections",
+  timestamps: true,
+})
 export class Enroll extends Model {
-  @Column({ primaryKey: true, autoIncrement: true })
+  @Column({
+    primaryKey: true,
+    autoIncrement: true,
+  })
   id!: number;
 
-  @Column({ defaultValue: 0 })
+  @Column({
+    defaultValue: 0,
+  })
   domainId!: number;
 
-  @Column({ defaultValue: 0 })
+  @Column({
+    defaultValue: 0,
+  })
   courseId!: number;
 
-  @Column
+  @Column({
+    allowNull: false,
+  })
   title!: string;
 
   @Column(DataType.TEXT)
@@ -30,7 +42,9 @@ export class Enroll extends Model {
   @Column
   ctaLink!: string;
 
-  @Column({ defaultValue: true })
+  @Column({
+    defaultValue: true,
+  })
   isActive!: boolean;
 
   @HasMany(() => EnrollCard)

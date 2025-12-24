@@ -8,6 +8,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+/* 🔥 SERVE UPLOADS CORRECTLY */
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"))
+);
+
 // API ROUTES
 app.use("/api", apiRoutes);
 
@@ -15,7 +21,7 @@ app.use("/api", apiRoutes);
 app.get("/", (_req, res) => {
   res.send("API is running");
 });
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 // 404 handler
 app.use((_req, res) => {
   res.status(404).json({ message: "Route not found" });
