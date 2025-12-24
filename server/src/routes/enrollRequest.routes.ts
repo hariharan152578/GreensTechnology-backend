@@ -1,20 +1,12 @@
 import { Router } from "express";
-import {
-  createEnrollRequest,
-  getEnrollRequests,
-} from "../controllers/enrollRequest.controller";
-import { uploadEnrollImage } from "../middlewares/upload.middleware";
+import { upload } from "../middlewares/upload.middleware";
+import { createEnrollRequest } from "../controllers/enrollRequest.controller";
 
 const router = Router();
 
-/* USER */
 router.post(
   "/request",
-  uploadEnrollImage.single("proofImage"),
+  upload.single("file"),
   createEnrollRequest
 );
-
-/* ADMIN */
-router.get("/request", getEnrollRequests);
-
 export default router;

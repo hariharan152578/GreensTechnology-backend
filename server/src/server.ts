@@ -10,14 +10,18 @@ const startServer = async () => {
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
-    await sequelize.sync({ alter: true }); // safe during dev
-    console.log("🧩 Models synced");
+    try {
+      await sequelize.sync(); // ❌ remove alter in runtime
+      console.log("🧩 Models synced");
+    } catch (syncError) {
+      console.error("⚠️ Model sync failed:", syncError);
+    }
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
-  } catch (error) {
-    console.error("⏳ DB not ready, retrying in 5s...");
+  } catch (dbError) {
+    console.error("❌ DB connection failed. Retrying in 5s...");
     setTimeout(startServer, 5000);
   }
 };

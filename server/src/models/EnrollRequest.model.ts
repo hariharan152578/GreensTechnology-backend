@@ -5,18 +5,30 @@ import {
   DataType,
 } from "sequelize-typescript";
 
-@Table({ tableName: "enroll_requests" })
+@Table({
+  tableName: "enroll_requests",
+  timestamps: true,
+})
 export class EnrollRequest extends Model {
-  @Column({ primaryKey: true, autoIncrement: true })
+  @Column({
+    primaryKey: true,
+    autoIncrement: true,
+  })
   id!: number;
 
-  @Column
+  @Column({
+    allowNull: false,
+  })
   name!: string;
 
-  @Column
+  @Column({
+    allowNull: false,
+  })
   email!: string;
 
-  @Column
+  @Column({
+    allowNull: false,
+  })
   phone!: string;
 
   @Column
