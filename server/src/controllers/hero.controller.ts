@@ -36,12 +36,27 @@ export const getHeroData = async (req: Request, res: Response) => {
 /* ---------- CREATE ---------- */
 export const createHero = async (req: Request, res: Response) => {
   try {
-    const hero = await Hero.create(req.body);
+    const files = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
+    const images =
+      files?.images?.map(
+        (file) => `/uploads/hero/${file.filename}`
+      ) || [];
+
+    const hero = await Hero.create({
+      ...req.body,
+      images,
+    });
+
     res.status(201).json(hero);
   } catch (error) {
+    console.error(error);
     res.status(400).json({ message: "Failed to create hero" });
   }
 };
+
 
 /* ---------- UPDATE ---------- */
 export const updateHero = async (req: Request, res: Response) => {
@@ -49,12 +64,27 @@ export const updateHero = async (req: Request, res: Response) => {
     const hero = await Hero.findByPk(req.params.id);
     if (!hero) return res.status(404).json({ message: "Hero not found" });
 
-    await hero.update(req.body);
+    const files = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
+    const images =
+      files?.images?.map(
+        (file) => `/uploads/hero/${file.filename}`
+      );
+
+    await hero.update({
+      ...req.body,
+      ...(images && images.length > 0 && { images }),
+    });
+
     res.json(hero);
   } catch (error) {
+    console.error(error);
     res.status(400).json({ message: "Failed to update hero" });
   }
 };
+
 
 /* ---------- DELETE ---------- */
 export const deleteHero = async (req: Request, res: Response) => {
@@ -66,5 +96,22 @@ export const deleteHero = async (req: Request, res: Response) => {
     res.json({ message: "Hero deleted" });
   } catch (error) {
     res.status(400).json({ message: "Failed to delete hero" });
+  }
+};
+
+
+
+/* ---------- GET ALL (For Admin Panel) ---------- */
+export const getAllHeroes = async (req: Request, res: Response) => {
+  try {
+    // Fetch ALL records, even inactive ones. 
+    // Order by newest first (optional but helpful)
+    const heroes = await Hero.findAll({
+      order: [['createdAt', 'DESC']] 
+    });
+
+    res.json(heroes); // This sends an ARRAY [ ... ]
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch heroes list" });
   }
 };

@@ -70,3 +70,15 @@ export const deleteCareerImpact = async (req: Request, res: Response) => {
     res.status(400).json({ message: "Failed to delete career impact" });
   }
 };
+
+export const getAllCareerImpacts = async (req: Request, res: Response) => {
+  try {
+    const data = await CareerImpact.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch career impacts" });
+  }
+};
+

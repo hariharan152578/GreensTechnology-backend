@@ -1,10 +1,12 @@
 import { Router } from "express";
 import {
+  getAllCertificates,
   getCertificate,
   createCertificate,
   updateCertificate,
   deleteCertificate,
 } from "../controllers/certificate.controller";
+import { uploadCertificateImage } from "../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -12,8 +14,18 @@ const router = Router();
 router.get("/", getCertificate);
 
 /* ---------- ADMIN ---------- */
-router.post("/", createCertificate);
-router.put("/:id", updateCertificate);
+router.get("/all", getAllCertificates);
+router.post(
+  "/",
+  uploadCertificateImage.single("certificateImage"),
+  createCertificate
+);
+
+router.put(
+  "/:id",
+  uploadCertificateImage.single("certificateImage"),
+  updateCertificate
+);
 router.delete("/:id", deleteCertificate);
 
 export default router;

@@ -80,3 +80,19 @@ export const deleteTestimonial = async (req: Request, res: Response) => {
     res.status(400).json({ message: "Failed to delete testimonial" });
   }
 };
+
+
+/* ---------- GET ALL (ADMIN) ---------- */
+export const getAllTestimonials = async (req: Request, res: Response) => {
+  try {
+    const testimonials = await Testimonial.findAll({
+      order: [["createdAt", "DESC"]], // latest first
+    });
+
+    res.json(testimonials);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch testimonials",
+    });
+  }
+};

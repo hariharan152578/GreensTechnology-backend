@@ -34,7 +34,7 @@ export const createStudentSuccess = async (req: Request, res: Response) => {
 
     const record = await StudentSuccess.create({
       ...req.body,
-      image: `/uploads/testimonials/${req.file.filename}`,
+      image: `/uploads/studentsucess/${req.file.filename}`,
     });
 
     res.status(201).json(record);
@@ -51,7 +51,7 @@ export const updateStudentSuccess = async (req: Request, res: Response) => {
     if (!record) return res.status(404).json({ message: "Not found" });
 
     const data: any = { ...req.body };
-    if (req.file) data.image = `/uploads/students/${req.file.filename}`;
+    if (req.file) data.image = `/uploads/studentsucess/${req.file.filename}`;
 
     await record.update(data);
     res.json(record);
@@ -70,5 +70,17 @@ export const deleteStudentSuccess = async (req: Request, res: Response) => {
     res.json({ message: "Deleted successfully" });
   } catch {
     res.status(400).json({ message: "Delete failed" });
+  }
+};
+
+
+export const getAllStudentSuccess = async (_req: Request, res: Response) => {
+  try {
+    const data = await StudentSuccess.findAll({
+      order: [["id", "DESC"]],
+    });
+    res.json(data);
+  } catch {
+    res.status(500).json({ message: "Failed to fetch all student success" });
   }
 };

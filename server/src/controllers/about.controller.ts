@@ -38,25 +38,80 @@ export const getAboutData = async (req: Request, res: Response) => {
 /* ---------- CREATE ---------- */
 export const createAbout = async (req: Request, res: Response) => {
   try {
-    const about = await About.create(req.body);
+    console.log("FILES:", req.files);
+    console.log("BODY:", req.body);
+
+    const files = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
+    const mainImages =
+      files?.mainImages?.map(
+        (file) => `/uploads/about/${file.filename}`
+      ) || [];
+
+    const smallImages =
+      files?.smallImages?.map(
+        (file) => `/uploads/about/${file.filename}`
+      ) || [];
+
+    const about = await About.create({
+      domainId: Number(req.body.domainId),
+      courseId: Number(req.body.courseId),
+      label: req.body.label,
+      title: req.body.title,
+      description1: req.body.description1,
+      description2: req.body.description2,
+      isActive: req.body.isActive === "true",
+      mainImages,
+      smallImages,
+    });
+
     res.status(201).json(about);
   } catch (error) {
+    console.error(error);
     res.status(400).json({ message: "Failed to create about section" });
   }
 };
+
+
+
 
 /* ---------- UPDATE ---------- */
 export const updateAbout = async (req: Request, res: Response) => {
   try {
     const about = await About.findByPk(req.params.id);
-    if (!about) return res.status(404).json({ message: "About not found" });
+    if (!about) {
+      return res.status(404).json({ message: "About not found" });
+    }
 
-    await about.update(req.body);
+    const files = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
+    const mainImages =
+      files?.mainImages?.map(
+        (file) => `/uploads/about/${file.filename}`
+      );
+
+    const smallImages =
+      files?.smallImages?.map(
+        (file) => `/uploads/about/${file.filename}`
+      );
+
+    await about.update({
+      ...req.body,
+      ...(mainImages && { mainImages }),
+      ...(smallImages && { smallImages }),
+    });
+
     res.json(about);
   } catch (error) {
+    console.error(error);
     res.status(400).json({ message: "Failed to update about section" });
   }
 };
+
 
 /* ---------- DELETE ---------- */
 export const deleteAbout = async (req: Request, res: Response) => {
@@ -68,5 +123,19 @@ export const deleteAbout = async (req: Request, res: Response) => {
     res.json({ message: "About deleted successfully" });
   } catch (error) {
     res.status(400).json({ message: "Failed to delete about section" });
+  }
+};
+
+
+
+/* ---------- GET ALL (For Admin Panel) ---------- */
+export const getAllAbouts = async (req: Request, res: Response) => {
+  try {
+    const abouts = await About.findAll({
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(abouts);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch about sections" });
   }
 };

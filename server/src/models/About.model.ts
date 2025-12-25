@@ -26,7 +26,7 @@ export class About extends Model {
   label!: string; // "About Us", "About DevOps", etc.
 
   @Column({ allowNull: false })
-  heading!: string;
+  title!: string;
 
   @Column({ type: DataType.TEXT, allowNull: false })
   description1!: string;

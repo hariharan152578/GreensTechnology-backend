@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  getAllCareerImpacts,
   getCareerImpact,
   createCareerImpact,
   updateCareerImpact,
@@ -12,6 +13,8 @@ const router = Router();
 router.get("/", getCareerImpact);
 
 /* ---------- ADMIN ---------- */
+router.get("/all", getAllCareerImpacts);
+
 router.post("/", createCareerImpact);
 router.put("/:id", updateCareerImpact);
 router.delete("/:id", deleteCareerImpact);

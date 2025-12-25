@@ -1,10 +1,12 @@
 import { Router } from "express";
 import {
+  getAllHeroes,
   getHeroData,
   createHero,
   updateHero,
   deleteHero,
 } from "../controllers/hero.controller";
+import { uploadHeroImages } from "../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -17,8 +19,22 @@ router.get("/", getHeroData);
 /**
  * ADMIN (CRUD)
  */
-router.post("/", createHero);
-router.put("/:id", updateHero);
+router.get("/all", getAllHeroes);
+router.post(
+  "/",
+  uploadHeroImages.fields([
+    { name: "images", maxCount: 10 }
+  ]),
+  createHero
+);
+
+router.put(
+  "/:id",
+  uploadHeroImages.fields([
+    { name: "images", maxCount: 10 }
+  ]),
+  updateHero
+);
 router.delete("/:id", deleteHero);
 
 export default router;

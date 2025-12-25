@@ -1,10 +1,12 @@
 import { Router } from "express";
 import {
+  getAllAbouts,
   getAboutData,
   createAbout,
   updateAbout,
   deleteAbout,
 } from "../controllers/about.controller";
+import { uploadAboutImages } from "../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -12,8 +14,9 @@ const router = Router();
 router.get("/", getAboutData);
 
 /* ---------- ADMIN ---------- */
-router.post("/", createAbout);
-router.put("/:id", updateAbout);
+router.get("/all", getAllAbouts);
+router.post("/", uploadAboutImages, createAbout);
+router.put("/:id", uploadAboutImages, updateAbout);
 router.delete("/:id", deleteAbout);
 
 export default router;

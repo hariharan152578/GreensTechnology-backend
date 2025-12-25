@@ -38,12 +38,23 @@ export const getCertificate = async (req: Request, res: Response) => {
 /* ---------- CREATE ---------- */
 export const createCertificate = async (req: Request, res: Response) => {
   try {
-    const certificate = await Certificate.create(req.body);
+    const file = req.file;
+
+    const certificate = await Certificate.create({
+      ...req.body,
+      steps: JSON.parse(req.body.steps),
+      certificateImage: file
+        ? `/uploads/certificates/${file.filename}`
+        : null,
+    });
+
     res.status(201).json(certificate);
   } catch (error) {
+    console.error(error);
     res.status(400).json({ message: "Failed to create certificate" });
   }
 };
+
 
 /* ---------- UPDATE ---------- */
 export const updateCertificate = async (req: Request, res: Response) => {
@@ -53,12 +64,23 @@ export const updateCertificate = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Certificate not found" });
     }
 
-    await certificate.update(req.body);
+    const file = req.file;
+
+    await certificate.update({
+      ...req.body,
+      ...(req.body.steps && { steps: JSON.parse(req.body.steps) }),
+      ...(file && {
+        certificateImage: `/uploads/certificates/${file.filename}`,
+      }),
+    });
+
     res.json(certificate);
   } catch (error) {
+    console.error(error);
     res.status(400).json({ message: "Failed to update certificate" });
   }
 };
+
 
 /* ---------- DELETE ---------- */
 export const deleteCertificate = async (req: Request, res: Response) => {
@@ -74,3 +96,18 @@ export const deleteCertificate = async (req: Request, res: Response) => {
     res.status(400).json({ message: "Failed to delete certificate" });
   }
 };
+
+
+export const getAllCertificates = async (req: Request, res: Response) => {
+  try {
+    const certificates = await Certificate.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+    res.json(certificates);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch certificates" });
+  }
+};
+
+
