@@ -49,7 +49,10 @@ export const createCareerImpact = async (req: Request, res: Response) => {
 export const updateCareerImpact = async (req: Request, res: Response) => {
   try {
     const data = await CareerImpact.findByPk(req.params.id);
-    if (!data) return res.status(404).json({ message: "Career Impact not found" });
+
+    if (!data) {
+      return res.status(404).json({ message: "Career Impact not found" });
+    }
 
     await data.update(req.body);
     res.json(data);
@@ -62,7 +65,10 @@ export const updateCareerImpact = async (req: Request, res: Response) => {
 export const deleteCareerImpact = async (req: Request, res: Response) => {
   try {
     const data = await CareerImpact.findByPk(req.params.id);
-    if (!data) return res.status(404).json({ message: "Career Impact not found" });
+
+    if (!data) {
+      return res.status(404).json({ message: "Career Impact not found" });
+    }
 
     await data.destroy();
     res.json({ message: "Career Impact deleted" });

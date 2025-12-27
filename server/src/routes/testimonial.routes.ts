@@ -9,9 +9,22 @@ import { uploadTestimonialImage } from "../middlewares/upload.middleware";
 
 const router = Router();
 
+/* FRONTEND */
 router.get("/", getTestimonials);
-router.post("/", uploadTestimonialImage.single("image"), createTestimonial);
-router.put("/:id", uploadTestimonialImage.single("image"), updateTestimonial);
+
+/* ADMIN */
+router.post(
+  "/",
+  uploadTestimonialImage.single("image"),
+  createTestimonial
+);
+
+router.put(
+  "/:id",
+  uploadTestimonialImage.single("image"),
+  updateTestimonial
+);
+
 router.delete("/:id", deleteTestimonial);
 
 export default router;

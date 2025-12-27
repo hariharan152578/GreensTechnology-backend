@@ -11,7 +11,7 @@ app.use(express.json());
 /* 🔥 SERVE UPLOADS CORRECTLY */
 app.use(
   "/uploads",
-  express.static(path.join(process.cwd(), "uploads"))
+  express.static(path.join(process.cwd(), "../uploads"))
 );
 
 // API ROUTES

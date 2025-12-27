@@ -8,10 +8,15 @@ import {
 
 const router = Router();
 
-/* ---------- PUBLIC ---------- */
+/**
+ * PUBLIC (Frontend)
+ * GET /api/career-impact?domainId=0&courseId=0
+ */
 router.get("/", getCareerImpact);
 
-/* ---------- ADMIN ---------- */
+/**
+ * ADMIN (CRUD)
+ */
 router.post("/", createCareerImpact);
 router.put("/:id", updateCareerImpact);
 router.delete("/:id", deleteCareerImpact);

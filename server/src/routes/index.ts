@@ -11,7 +11,11 @@ import certificateRoutes from "./certificate.routes";
 import courseRoutes from "./course.routes";
 import testimonialRoutes from "./testimonial.routes";
 import studyMaterial from "./studyMaterial.routes"
-import Success from "./studentSuccess.routes"
+import Success from "./studentSuccess.routes";
+import Module from "./module.routes"
+import projectRoutes from "./project.routes";
+import videoRoutes from "./videoTestimonial.routes";
+import techStackRoutes from "./techStack.routes";
 const router = Router();
 
 router.use("/hero", heroRoutes);
@@ -27,4 +31,9 @@ router.use("/courses", courseRoutes);
 router.use("/testimonials", testimonialRoutes); 
 router.use("/materials",studyMaterial);   
 router.use("/student-success",Success);
+router.use("/modules",Module);
+router.use("/projects", projectRoutes);
+router.use("/videos", videoRoutes);
+router.use("/tech-stack", techStackRoutes);
+
 export default router;
