@@ -40,6 +40,12 @@ export class Hero extends Model {
   @Column({ type: DataType.JSON })
   images!: string[]; // slider images
 
+  // 🔥 NEW: RUNNING TEXT (MARQUEE)
+  @Column({ type: DataType.JSON })
+  runningTexts!: {
+    text: string;
+  }[];
+
   @Column({ defaultValue: true })
   isActive!: boolean;
 }

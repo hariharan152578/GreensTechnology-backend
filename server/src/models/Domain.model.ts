@@ -7,6 +7,7 @@ import {
 
 @Table({ tableName: "domains" })
 export class Domain extends Model {
+  /* ---------- PRIMARY KEY ---------- */
   @Column({
     type: DataType.INTEGER,
     primaryKey: true,
@@ -14,8 +15,16 @@ export class Domain extends Model {
   })
   id!: number;
 
+  /* ---------- DOMAIN / COURSE MAPPING ---------- */
+  @Column({ type: DataType.INTEGER, defaultValue: 0 })
+  domainId!: number; // 0 = landing, 1 = DevOps, 2 = AWS, etc.
+
+  @Column({ type: DataType.INTEGER, defaultValue: 0 })
+  courseId!: number; // 0 = domain-level
+
+  /* ---------- CONTENT ---------- */
   @Column({ allowNull: false })
-  domain!: string; // DevOps, AWS, Linux
+  domain!: string;
 
   @Column({ allowNull: false })
   title!: string;
@@ -29,12 +38,14 @@ export class Domain extends Model {
   @Column({ type: DataType.TEXT, allowNull: false })
   description!: string;
 
+  /* ---------- IMAGES ---------- */
   @Column({ allowNull: false })
   mainImageUrl!: string;
 
   @Column({ allowNull: false })
   smallImageUrl!: string;
 
+  /* ---------- STATUS ---------- */
   @Column({ defaultValue: true })
   isActive!: boolean;
 }

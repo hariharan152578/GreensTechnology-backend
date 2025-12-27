@@ -11,14 +11,12 @@ export const getCertificate = async (req: Request, res: Response) => {
       where: { domainId, courseId, isActive: true },
     });
 
-    // fallback → domain level
     if (!certificate && domainId > 0 && courseId > 0) {
       certificate = await Certificate.findOne({
         where: { domainId, courseId: 0, isActive: true },
       });
     }
 
-    // fallback → landing
     if (!certificate) {
       certificate = await Certificate.findOne({
         where: { domainId: 0, courseId: 0, isActive: true },
@@ -35,17 +33,38 @@ export const getCertificate = async (req: Request, res: Response) => {
   }
 };
 
-/* ---------- CREATE ---------- */
+/* ---------- CREATE (WITH IMAGE) ---------- */
 export const createCertificate = async (req: Request, res: Response) => {
   try {
-    const certificate = await Certificate.create(req.body);
+    const {
+      domainId,
+      courseId,
+      sectionTitle,
+      steps,
+      isActive,
+    } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Certificate image required" });
+    }
+
+    const certificate = await Certificate.create({
+      domainId,
+      courseId,
+      sectionTitle,
+      steps: JSON.parse(steps), // 🔥 IMPORTANT
+      certificateImage: `/uploads/certificates/${req.file.filename}`,
+      isActive: isActive ?? true,
+    });
+
     res.status(201).json(certificate);
   } catch (error) {
+    console.error(error);
     res.status(400).json({ message: "Failed to create certificate" });
   }
 };
 
-/* ---------- UPDATE ---------- */
+/* ---------- UPDATE (OPTIONAL IMAGE) ---------- */
 export const updateCertificate = async (req: Request, res: Response) => {
   try {
     const certificate = await Certificate.findByPk(req.params.id);
@@ -53,7 +72,17 @@ export const updateCertificate = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Certificate not found" });
     }
 
-    await certificate.update(req.body);
+    const updates: any = { ...req.body };
+
+    if (req.body.steps) {
+      updates.steps = JSON.parse(req.body.steps);
+    }
+
+    if (req.file) {
+      updates.certificateImage = `/uploads/certificates/${req.file.filename}`;
+    }
+
+    await certificate.update(updates);
     res.json(certificate);
   } catch (error) {
     res.status(400).json({ message: "Failed to update certificate" });

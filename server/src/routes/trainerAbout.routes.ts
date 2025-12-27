@@ -5,6 +5,7 @@ import {
   updateTrainerAbout,
   deleteTrainerAbout,
 } from "../controllers/trainerAbout.controller";
+import { uploadTrainerAboutImages } from "../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -12,8 +13,24 @@ const router = Router();
 router.get("/", getTrainerAbout);
 
 /* ---------- ADMIN ---------- */
-router.post("/", createTrainerAbout);
-router.put("/:id", updateTrainerAbout);
+router.post(
+  "/",
+  uploadTrainerAboutImages.fields([
+    { name: "mainImages", maxCount: 5 },
+    { name: "smallImages", maxCount: 5 },
+  ]),
+  createTrainerAbout
+);
+
+router.put(
+  "/:id",
+  uploadTrainerAboutImages.fields([
+    { name: "mainImages", maxCount: 5 },
+    { name: "smallImages", maxCount: 5 },
+  ]),
+  updateTrainerAbout
+);
+
 router.delete("/:id", deleteTrainerAbout);
 
 export default router;

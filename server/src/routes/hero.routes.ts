@@ -5,20 +5,18 @@ import {
   updateHero,
   deleteHero,
 } from "../controllers/hero.controller";
+import { uploadHeroImages } from "../middlewares/upload.middleware";
 
 const router = Router();
 
-/**
- * PUBLIC (Frontend)
- * GET /api/hero?domainId=0&courseId=0
- */
+/* ---------- PUBLIC ---------- */
 router.get("/", getHeroData);
 
-/**
- * ADMIN (CRUD)
- */
-router.post("/", createHero);
-router.put("/:id", updateHero);
+/* ---------- ADMIN ---------- */
+router.post("/", uploadHeroImages.array("images", 5), createHero);
+
+router.put("/:id", uploadHeroImages.array("images", 5), updateHero);
+
 router.delete("/:id", deleteHero);
 
 export default router;

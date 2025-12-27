@@ -1,9 +1,4 @@
-import {
-  Table,
-  Column,
-  Model,
-  DataType,
-} from "sequelize-typescript";
+import { Table, Column, Model, DataType } from "sequelize-typescript";
 
 @Table({ tableName: "trainer_abouts" })
 export class TrainerAbout extends Model {
@@ -14,16 +9,14 @@ export class TrainerAbout extends Model {
   })
   id!: number;
 
-  // 0 = landing
   @Column({ type: DataType.INTEGER, defaultValue: 0 })
   domainId!: number;
 
-  // 0 = domain-level
   @Column({ type: DataType.INTEGER, defaultValue: 0 })
   courseId!: number;
 
   @Column({ allowNull: false })
-  label!: string; // "Trainer Profile", "Meet Our Trainers"
+  label!: string;
 
   @Column({ allowNull: false })
   heading!: string;

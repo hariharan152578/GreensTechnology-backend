@@ -6,14 +6,16 @@ import {
   deleteCertificate,
 } from "../controllers/certificate.controller";
 
+import { uploadCertificateImage } from "../middlewares/upload.middleware";
+
 const router = Router();
 
-/* ---------- PUBLIC ---------- */
+/* PUBLIC */
 router.get("/", getCertificate);
 
-/* ---------- ADMIN ---------- */
-router.post("/", createCertificate);
-router.put("/:id", updateCertificate);
+/* ADMIN */
+router.post("/", uploadCertificateImage.single("certificateImage"), createCertificate);
+router.put("/:id", uploadCertificateImage.single("certificateImage"), updateCertificate);
 router.delete("/:id", deleteCertificate);
 
 export default router;

@@ -5,6 +5,7 @@ import {
   updateCourse,
   deleteCourse,
 } from "../controllers/course.controller";
+import { uploadCourseImage } from "../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -12,8 +13,10 @@ const router = Router();
 router.get("/", getCourses);
 
 /* ---------- ADMIN ---------- */
-router.post("/", createCourse);
-router.put("/:id", updateCourse);
+router.post("/", uploadCourseImage.single("image"), createCourse);
+
+router.put("/:id", uploadCourseImage.single("image"), updateCourse);
+
 router.delete("/:id", deleteCourse);
 
 export default router;
