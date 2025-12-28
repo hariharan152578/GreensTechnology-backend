@@ -1,4 +1,3 @@
-// src/routes/project.routes.ts
 import { Router } from "express";
 import {
   getProjects,
@@ -7,7 +6,8 @@ import {
   deleteProject,
   addProjectTech,
 } from "../controllers/project.controller";
-import { uploadProjectImage } from "../middlewares/upload.middleware";
+
+import { uploadProjectThumbnail } from "../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -15,7 +15,7 @@ const router = Router();
 router.get("/", getProjects);
 
 /* ADMIN */
-router.post("/", uploadProjectImage.single("image"), createProject);
+router.post("/", uploadProjectThumbnail.single("image"), createProject);
 router.put("/:id", updateProject);
 router.delete("/:id", deleteProject);
 

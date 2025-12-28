@@ -2,9 +2,10 @@ import { Router } from "express";
 import {
   getVideoTestimonials,
   createVideoTestimonial,
+  updateVideoTestimonial,
   deleteVideoTestimonial,
 } from "../controllers/videoTestimonial.controller";
-import { uploadVideoImage } from "../middlewares/upload.middleware";
+import { uploadVideoThumbnailImage } from "../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -12,7 +13,18 @@ const router = Router();
 router.get("/", getVideoTestimonials);
 
 /* ADMIN */
-router.post("/", uploadVideoImage.single("image"), createVideoTestimonial);
+router.post(
+  "/",
+  uploadVideoThumbnailImage.single("image"), // 🔥 field MUST be "image"
+  createVideoTestimonial
+);
+
+router.put(
+  "/:id",
+  uploadVideoThumbnailImage.single("image"),
+  updateVideoTestimonial
+);
+
 router.delete("/:id", deleteVideoTestimonial);
 
 export default router;

@@ -98,31 +98,28 @@ export const uploadVideoImage = multer({
 
 /* =====================================================
    🟢 TECH STACK ICON UPLOAD
-===================================================== */
-const techDir = "uploads/tech-stack";
-ensureDir(techDir);
 
-const techStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, techDir),
+/* =====================================================
+   🟢 TECH STACK IMAGE UPLOAD
+===================================================== */
+const techStackDir = "uploads/tech-stack";
+ensureDir(techStackDir);
+
+const techStackStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, techStackDir);
+  },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
   },
 });
 
-export const uploadTechIcon = multer({
-  storage: techStorage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (_req, file, cb) => {
-    const allowed = /png|jpg|jpeg|webp/;
-    const valid =
-      allowed.test(file.mimetype) &&
-      allowed.test(path.extname(file.originalname).toLowerCase());
-
-    if (!valid) return cb(new Error("Only image files allowed"));
-    cb(null, true);
-  },
+export const uploadTechStackImage = multer({
+  storage: techStackStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
+
 
 const domainDir = "uploads/domains";
 
@@ -291,3 +288,125 @@ export const uploadCertificateImage = multer({
     cb(null, true);
   },
 });
+
+/* =====================================================
+   🟢 STUDENT SUCCESS IMAGE UPLOAD
+===================================================== */
+const studentSuccessDir = "uploads/student-success";
+ensureDir(studentSuccessDir);
+
+const studentSuccessStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, studentSuccessDir),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+  },
+});
+
+export const uploadStudentSuccessImage = multer({
+  storage: studentSuccessStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = /jpg|jpeg|png|webp/;
+    const valid =
+      allowed.test(file.mimetype) &&
+      allowed.test(path.extname(file.originalname).toLowerCase());
+
+    if (!valid) return cb(new Error("Only image files allowed"));
+    cb(null, true);
+  },
+});
+/* =====================================================
+   🟣 PROJECT THUMBNAIL IMAGE UPLOAD
+===================================================== */
+const projectThumbnailDir = "uploads/projects";
+ensureDir(projectThumbnailDir);
+
+const projectThumbnailStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, projectThumbnailDir);
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(
+      null,
+      `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`
+    );
+  },
+});
+
+export const uploadProjectThumbnail = multer({
+  storage: projectThumbnailStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = /jpg|jpeg|png|webp/;
+    const valid =
+      allowed.test(file.mimetype) &&
+      allowed.test(path.extname(file.originalname).toLowerCase());
+
+    if (!valid) {
+      return cb(new Error("Only image files allowed"));
+    }
+    cb(null, true);
+  },
+});
+
+/* =====================================================
+   📚 STUDY MATERIAL FILE UPLOAD
+===================================================== */
+const materialDir = "uploads/materials";
+ensureDir(materialDir);
+
+const materialStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, materialDir),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, "_")}${ext}`);
+  },
+});
+
+export const uploadStudyMaterial = multer({
+  storage: materialStorage,
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = /pdf|docx|ppt|pptx|mp4|webm/;
+    const ext = path.extname(file.originalname).toLowerCase(); 
+
+    if (!allowed.test(ext)) {
+      return cb(new Error("Unsupported file type"));
+    }
+    cb(null, true);
+  },
+});
+ /* =====================================================
+   🎬 VIDEO TESTIMONIAL THUMBNAIL IMAGE UPLOAD
+===================================================== */
+const videoThumbnailDir = "uploads/video-thumbnails";
+ensureDir(videoThumbnailDir);
+
+const videoThumbnailStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, videoThumbnailDir);
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}${ext}`);
+  },
+});
+
+export const uploadVideoThumbnailImage = multer({
+  storage: videoThumbnailStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = /jpg|jpeg|png|webp/;
+    const valid =
+      allowed.test(file.mimetype) &&
+      allowed.test(path.extname(file.originalname).toLowerCase());
+
+    if (!valid) {
+      return cb(new Error("Only image files allowed"));
+    }
+    cb(null, true);
+  },
+});
+

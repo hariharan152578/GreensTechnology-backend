@@ -2,16 +2,22 @@ import { Router } from "express";
 import {
   getStudentSuccess,
   createStudentSuccess,
-  updateStudentSuccess,
   deleteStudentSuccess,
 } from "../controllers/studentSuccess.controller";
-import { uploadTestimonialImage } from "../middlewares/upload.middleware";
+import { uploadStudentSuccessImage } from "../middlewares/upload.middleware";
 
 const router = Router();
 
+/* ---------- PUBLIC ---------- */
 router.get("/", getStudentSuccess);
-router.post("/", uploadTestimonialImage.single("image"), createStudentSuccess);
-router.put("/:id", uploadTestimonialImage.single("image"), updateStudentSuccess);
+
+/* ---------- ADMIN ---------- */
+router.post(
+  "/",
+  uploadStudentSuccessImage.single("image"), // 🔥 field name = image
+  createStudentSuccess
+);
+
 router.delete("/:id", deleteStudentSuccess);
 
 export default router;

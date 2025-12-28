@@ -1,3 +1,4 @@
+// src/routes/techStack.routes.ts
 import { Router } from "express";
 import {
   getTechStack,
@@ -5,7 +6,7 @@ import {
   updateTechStack,
   deleteTechStack,
 } from "../controllers/techStack.controller";
-import { uploadTechIcon } from "../middlewares/upload.middleware";
+import { uploadTechStackImage } from "../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -13,8 +14,18 @@ const router = Router();
 router.get("/", getTechStack);
 
 /* ADMIN */
-router.post("/", uploadTechIcon.single("icon"), createTechStack);
-router.put("/:id", updateTechStack);
+router.post(
+  "/",
+  uploadTechStackImage.single("image"), // 🔥 MUST BE "image"
+  createTechStack
+);
+
+router.put(
+  "/:id",
+  uploadTechStackImage.single("image"),
+  updateTechStack
+);
+
 router.delete("/:id", deleteTechStack);
 
 export default router;
