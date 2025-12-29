@@ -9,12 +9,14 @@ import { uploadEnrollmentProof } from "../middlewares/upload.middleware";
 
 const router = Router();
 
+/* ---------- FRONTEND ---------- */
 router.post(
   "/request",
   uploadEnrollmentProof.single("file"),
   createEnrollmentRequest
 );
 
+/* ---------- ADMIN ---------- */
 router.get("/", getAllEnrollmentRequests);
 router.put("/:id", updateEnrollmentRequest);
 router.delete("/:id", deleteEnrollmentRequest);
