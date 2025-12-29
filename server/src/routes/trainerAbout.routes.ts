@@ -4,33 +4,45 @@ import {
   createTrainerAbout,
   updateTrainerAbout,
   deleteTrainerAbout,
+  getAllTrainerAboutsForAdmin,
+  getTrainerAboutById,
+  // REMOVED: updateSortOrder
 } from "../controllers/trainerAbout.controller";
+import { authenticateAdmin } from "../middlewares/auth.middleware";
 import { uploadTrainerAboutImages } from "../middlewares/upload.middleware";
 
 const router = Router();
 
-/* ---------- PUBLIC ---------- */
-router.get("/", getTrainerAbout);
+/* ---------- PUBLIC ROUTES ---------- */
+router.get("/", getTrainerAbout); // GET /api/trainer-about - public active section
 
-/* ---------- ADMIN ---------- */
+/* ---------- ADMIN ROUTES ---------- */
+router.get("/admin/all", authenticateAdmin, getAllTrainerAboutsForAdmin); // GET /api/trainer-about/admin/all
+router.get("/:id", authenticateAdmin, getTrainerAboutById); // GET /api/trainer-about/:id
+
 router.post(
   "/",
+  authenticateAdmin,
   uploadTrainerAboutImages.fields([
-    { name: "mainImages", maxCount: 5 },
-    { name: "smallImages", maxCount: 5 },
+    { name: "mainImages", maxCount: 10 },
+    { name: "smallImages", maxCount: 10 },
   ]),
   createTrainerAbout
 );
 
 router.put(
   "/:id",
+  authenticateAdmin,
   uploadTrainerAboutImages.fields([
-    { name: "mainImages", maxCount: 5 },
-    { name: "smallImages", maxCount: 5 },
+    { name: "mainImages", maxCount: 10 },
+    { name: "smallImages", maxCount: 10 },
   ]),
   updateTrainerAbout
 );
 
-router.delete("/:id", deleteTrainerAbout);
+router.delete("/:id", authenticateAdmin, deleteTrainerAbout);
+
+// REMOVED: sort order update route
+// router.put("/sort/update", authenticateAdmin, updateSortOrder);
 
 export default router;

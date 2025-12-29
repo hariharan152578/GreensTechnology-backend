@@ -4,8 +4,18 @@
   import path from "path";
 
   const app = express();
-
-  app.use(cors());
+const allowedOrigins = [
+  'http://localhost:4000', // Your current frontend
+  'http://localhost:5173', // Vite default
+  'http://localhost:3000', // React default
+];
+  // app.use(cors());
+app.use(cors({
+  origin: '*', // Allow all origins (for development only!)
+  credentials: false, // Must be false when origin is '*'
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
   app.use(express.json());
 
   /* 🔥 SERVE UPLOADS CORRECTLY */

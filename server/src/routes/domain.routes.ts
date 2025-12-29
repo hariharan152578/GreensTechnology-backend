@@ -1,3 +1,4 @@
+// routes/domain.routes.ts
 import { Router } from "express";
 import {
   getDomains,
@@ -5,18 +6,22 @@ import {
   createDomain,
   updateDomain,
   deleteDomain,
+  getAllDomainsForAdmin
 } from "../controllers/domain.controller";
 import { uploadDomainImages } from "../middlewares/upload.middleware";
+import { authenticateAdmin } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-/* ---------- PUBLIC ---------- */
-router.get("/", getDomains);
-router.get("/:id", getDomainById);
+/* ---------- PUBLIC ROUTES ---------- */
+router.get("/", getDomains); // GET /api/domain - public active domains
+router.get("/:id", getDomainById); // GET /api/domain/:id
 
-/* ---------- ADMIN ---------- */
+/* ---------- ADMIN ROUTES ---------- */
+router.get("/admin/all", authenticateAdmin, getAllDomainsForAdmin); // GET /api/domain/admin/all
 router.post(
   "/",
+  authenticateAdmin,
   uploadDomainImages.fields([
     { name: "mainImage", maxCount: 1 },
     { name: "smallImage", maxCount: 1 },
@@ -26,6 +31,7 @@ router.post(
 
 router.put(
   "/:id",
+  authenticateAdmin,
   uploadDomainImages.fields([
     { name: "mainImage", maxCount: 1 },
     { name: "smallImage", maxCount: 1 },
@@ -33,6 +39,6 @@ router.put(
   updateDomain
 );
 
-router.delete("/:id", deleteDomain);
+router.delete("/:id", authenticateAdmin, deleteDomain);
 
 export default router;

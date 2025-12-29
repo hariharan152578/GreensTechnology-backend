@@ -1,153 +1,200 @@
 import { Request, Response } from "express";
 import { EnrollCard } from "../models/EnrollCard.model";
 
-/* =====================================================
-   CREATE (MULTIPLE IMAGES)
-===================================================== */
-export const createEnrollCards = async (req: Request, res: Response) => {
-  try {
-    const enrollSectionId = Number(req.body.enrollSectionId);
-    const title = req.body.title;
+/* ---------- GET (Frontend) ---------- */
+export const getEnrollCards = async (req: Request, res: Response) => {
+  const domainId = Number(req.query.domainId || 0);
+  const courseId = Number(req.query.courseId || 0);
 
-    if (!enrollSectionId || !title) {
-      return res.status(400).json({
-        message: "enrollSectionId and title are required",
-      });
-    }
+  let cards = await EnrollCard.findAll({
+    where: { domainId, courseId, isActive: true },
+    order: [["order", "ASC"]],
+  });
 
-    const files = req.files as Express.Multer.File[];
-
-    if (!files || files.length === 0) {
-      return res.status(400).json({ message: "Images required" });
-    }
-
-    const cards = await Promise.all(
-      files.map((file, index) =>
-        EnrollCard.create({
-          enrollSectionId,
-          title,
-          order: index,
-          imageUrl: `/uploads/enroll/${file.filename}`,
-          isActive: true,
-        })
-      )
-    );
-
-    res.status(201).json(cards);
-  } catch (error) {
-    console.error("Enroll card create error:", error);
-    res.status(500).json({
-      message: "Failed to create enroll cards",
-      error: String(error),
+  if (!cards.length && domainId > 0) {
+    cards = await EnrollCard.findAll({
+      where: { domainId, courseId: 0, isActive: true },
     });
   }
+
+  if (!cards.length) {
+    cards = await EnrollCard.findAll({
+      where: { domainId: 0, courseId: 0, isActive: true },
+    });
+  }
+
+  res.json(cards);
 };
 
-/* =====================================================
-   READ (BY SECTION)
-===================================================== */
-export const getEnrollCards = async (req: Request, res: Response) => {
+/* ---------- GET ALL (Admin) ---------- */
+export const getEnrollCardsAdmin = async (req: Request, res: Response) => {
   try {
-    const enrollSectionId = Number(req.query.enrollSectionId);
-
-    if (!enrollSectionId) {
-      return res.status(400).json({
-        message: "enrollSectionId query param required",
-      });
-    }
-
     const cards = await EnrollCard.findAll({
-      where: {
-        enrollSectionId,
-        isActive: true,
-      },
-      order: [["order", "ASC"]],
+      order: [
+        ["domainId", "ASC"],
+        ["courseId", "ASC"],
+        ["order", "ASC"],
+      ],
     });
-
     res.json(cards);
   } catch (error) {
-    console.error("Enroll card fetch error:", error);
-    res.status(500).json({
-      message: "Failed to fetch enroll cards",
-    });
+    console.error("Error fetching enroll cards for admin:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-/* =====================================================
-   UPDATE (TEXT + OPTIONAL IMAGE)
-===================================================== */
+/* ---------- CREATE ---------- */
+export const createEnrollCard = async (req: Request, res: Response) => {
+  try {
+    const image = req.file
+      ? `/uploads/enroll-cards/${req.file.filename}`
+      : "";
+
+    // Validate required fields
+    if (!req.body.title) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    if (!image) {
+      return res.status(400).json({ message: "Image is required" });
+    }
+
+    // Parse numeric fields
+    const domainId = Number(req.body.domainId || 0);
+    const courseId = Number(req.body.courseId || 0);
+    const order = Number(req.body.order || 0);
+    const isActive = req.body.isActive === "true" || req.body.isActive === true;
+
+    const card = await EnrollCard.create({
+      domainId,
+      courseId,
+      title: req.body.title,
+      image,
+      order,
+      isActive,
+    });
+
+    res.status(201).json(card);
+  } catch (error) {
+    console.error("Error creating enroll card:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/* ---------- UPDATE ---------- */
 export const updateEnrollCard = async (req: Request, res: Response) => {
   try {
     const card = await EnrollCard.findByPk(req.params.id);
+    if (!card) return res.status(404).json({ message: "Not found" });
 
-    if (!card) {
-      return res.status(404).json({ message: "Enroll card not found" });
-    }
-
-    const { title, order, isActive } = req.body;
-
-    let imageUrl = card.imageUrl;
-
+    // Update image if new file is uploaded
     if (req.file) {
-      imageUrl = `/uploads/enroll/${req.file.filename}`;
+      card. imageUrl = `/uploads/enroll-cards/${req.file.filename}`;
     }
 
-    await card.update({
-      title: title ?? card.title,
-      order: order ?? card.order,
-      isActive: isActive ?? card.isActive,
-      imageUrl,
-    });
+    // Parse numeric fields
+    const updateData: any = {};
+    if (req.body.domainId !== undefined) updateData.domainId = Number(req.body.domainId);
+    if (req.body.courseId !== undefined) updateData.courseId = Number(req.body.courseId);
+    if (req.body.title !== undefined) updateData.title = req.body.title;
+    if (req.body.order !== undefined) updateData.order = Number(req.body.order);
+    if (req.body.isActive !== undefined) {
+      updateData.isActive = req.body.isActive === "true" || req.body.isActive === true;
+    }
 
+    // Handle image removal if requested
+    if (req.body.removeImage === "true") {
+      updateData.image = "";
+    }
+
+    await card.update(updateData);
     res.json(card);
   } catch (error) {
-    console.error("Enroll card update error:", error);
-    res.status(500).json({
-      message: "Failed to update enroll card",
+    console.error("Error updating enroll card:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/* ---------- UPDATE ORDER ---------- */
+export const updateEnrollCardOrder = async (req: Request, res: Response) => {
+  try {
+    const { cards } = req.body;
+
+    if (!Array.isArray(cards)) {
+      return res.status(400).json({ message: "Invalid request format" });
+    }
+
+    // Validate each card has required fields
+    for (const cardData of cards) {
+      if (!cardData.id || cardData.order === undefined) {
+        return res.status(400).json({ 
+          message: "Each card must have id and order properties" 
+        });
+      }
+    }
+
+    // Update each card's order
+    const updatePromises = cards.map((cardData) =>
+      EnrollCard.update(
+        { order: cardData.order },
+        { where: { id: cardData.id } }
+      )
+    );
+
+    await Promise.all(updatePromises);
+    
+    res.json({ 
+      success: true, 
+      message: "Order updated successfully" 
+    });
+  } catch (error) {
+    console.error("Error updating card order:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error updating order" 
     });
   }
 };
 
-/* =====================================================
-   SOFT DELETE
-===================================================== */
+/* ---------- DELETE (SOFT) ---------- */
 export const deleteEnrollCard = async (req: Request, res: Response) => {
   try {
     const card = await EnrollCard.findByPk(req.params.id);
+    if (!card) return res.status(404).json({ message: "Not found" });
 
-    if (!card) {
-      return res.status(404).json({ message: "Enroll card not found" });
-    }
+    card.isActive = false;
+    await card.save();
 
-    await card.update({ isActive: false });
-
-    res.json({ message: "Enroll card soft-deleted" });
+    res.json({ 
+      success: true,
+      message: "Enroll card deleted" 
+    });
   } catch (error) {
-    console.error("Enroll card delete error:", error);
-    res.status(500).json({
-      message: "Failed to delete enroll card",
+    console.error("Error deleting enroll card:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Server error" 
     });
   }
 };
 
-/* =====================================================
-   HARD DELETE
-===================================================== */
+/* ---------- HARD DELETE (Optional) ---------- */
 export const hardDeleteEnrollCard = async (req: Request, res: Response) => {
   try {
     const card = await EnrollCard.findByPk(req.params.id);
-
-    if (!card) {
-      return res.status(404).json({ message: "Enroll card not found" });
-    }
+    if (!card) return res.status(404).json({ message: "Not found" });
 
     await card.destroy();
-
-    res.json({ message: "Enroll card permanently deleted" });
+    
+    res.json({ 
+      success: true,
+      message: "Enroll card permanently deleted" 
+    });
   } catch (error) {
-    console.error("Enroll card hard delete error:", error);
-    res.status(500).json({
-      message: "Failed to hard delete enroll card",
+    console.error("Error hard deleting enroll card:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Server error" 
     });
   }
 };

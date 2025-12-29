@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import  Notice  from '../models/Notice';
+import { Request, Response } from "express";
+import  Notice  from "../models/Notice.model";
 
 /**
  * @description Get all active notices (Used by the Marquee/Navbar)
@@ -16,8 +16,12 @@ export const getActiveNotices = async (req: Request, res: Response): Promise<voi
     // Map to array of strings for the frontend marquee
     const noticeStrings = notices.map(n => n.content);
     res.status(200).json(noticeStrings);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching active notices", error });
+  } catch (error: any) {
+    console.error("Error fetching active notices:", error);
+    res.status(500).json({ 
+      message: "Error fetching active notices", 
+      error: error.message 
+    });
   }
 };
 
@@ -27,10 +31,16 @@ export const getActiveNotices = async (req: Request, res: Response): Promise<voi
  */
 export const getAllNotices = async (req: Request, res: Response): Promise<void> => {
   try {
-    const notices = await Notice.findAll({ order: [['createdAt', 'DESC']] });
+    const notices = await Notice.findAll({ 
+      order: [['createdAt', 'DESC']] 
+    });
     res.status(200).json(notices);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching all notices", error });
+  } catch (error: any) {
+    console.error("Error fetching all notices:", error);
+    res.status(500).json({ 
+      message: "Error fetching all notices", 
+      error: error.message 
+    });
   }
 };
 
@@ -42,15 +52,26 @@ export const createNotice = async (req: Request, res: Response): Promise<void> =
   try {
     const { content, isActive } = req.body;
     
-    if (!content) {
+    if (!content || content.trim() === '') {
       res.status(400).json({ message: "Content is required" });
       return;
     }
 
-    const newNotice = await Notice.create({ content, isActive });
-    res.status(201).json(newNotice);
-  } catch (error) {
-    res.status(500).json({ message: "Error creating notice", error });
+    const newNotice = await Notice.create({ 
+      content: content.trim(), 
+      isActive: isActive === undefined ? true : isActive 
+    });
+    
+    res.status(201).json({
+      message: "Notice created successfully",
+      notice: newNotice
+    });
+  } catch (error: any) {
+    console.error("Error creating notice:", error);
+    res.status(500).json({ 
+      message: "Error creating notice", 
+      error: error.message 
+    });
   }
 };
 
@@ -70,10 +91,21 @@ export const updateNotice = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    await notice.update({ content, isActive });
-    res.status(200).json(notice);
-  } catch (error) {
-    res.status(500).json({ message: "Error updating notice", error });
+    await notice.update({ 
+      content: content !== undefined ? content.trim() : notice.content, 
+      isActive: isActive !== undefined ? isActive : notice.isActive 
+    });
+    
+    res.status(200).json({
+      message: "Notice updated successfully",
+      notice
+    });
+  } catch (error: any) {
+    console.error("Error updating notice:", error);
+    res.status(500).json({ 
+      message: "Error updating notice", 
+      error: error.message 
+    });
   }
 };
 
@@ -92,8 +124,15 @@ export const deleteNotice = async (req: Request, res: Response): Promise<void> =
     }
 
     await notice.destroy();
-    res.status(200).json({ message: "Notice deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting notice", error });
+    res.status(200).json({ 
+      message: "Notice deleted successfully",
+      success: true
+    });
+  } catch (error: any) {
+    console.error("Error deleting notice:", error);
+    res.status(500).json({ 
+      message: "Error deleting notice", 
+      error: error.message 
+    });
   }
 };

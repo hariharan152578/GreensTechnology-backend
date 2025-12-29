@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { getEnrollSection } from "../controllers/enroll.controller";
+import { getEnrollCards } from "../controllers/enroll.controller";
 
 const router = Router();
-router.get("/", getEnrollSection);
+router.get("/", getEnrollCards);
 export default router;

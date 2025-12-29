@@ -16,6 +16,8 @@ import Module from "./module.routes"
 import projectRoutes from "./project.routes";
 import videoRoutes from "./videoTestimonial.routes";
 import techStackRoutes from "./techStack.routes";
+import adminRoutes from "./admin.routes";
+import notice from "./notice.routes";
 const router = Router();
 
 router.use("/hero", heroRoutes);
@@ -35,5 +37,6 @@ router.use("/modules",Module);
 router.use("/projects", projectRoutes);
 router.use("/videos", videoRoutes);
 router.use("/tech-stack", techStackRoutes);
-
+router.use("/admin", adminRoutes);
+router.use("/notices", notice);
 export default router;
