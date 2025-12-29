@@ -3,9 +3,9 @@ import { User } from "../models/User.model";
 import { Domain } from "../models/Domain.model";
 import { Course } from "../models/Course.model";
 import { Hero } from "../models/Hero.model";
-import { Enroll } from "../models/Enroll.model";
 import { EnrollCard } from "../models/EnrollCard.model";
-import { EnrollRequest } from "../models/EnrollRequest.model";
+import { EnrollmentRequest } from "../models/EnrollmentRequest.model";
+import { FAQChat } from "../models/FaqChat.model";
 import { About } from "../models/About.model";
 import { TrainerAbout } from "../models/TrainerAbout.model";
 import { CareerImpact } from "../models/CareerImpact.model";
@@ -32,9 +32,9 @@ export const sequelize = new Sequelize({
     Hero,
     Domain,
     Course,
-    Enroll,
     EnrollCard,
-    EnrollRequest,
+    EnrollmentRequest,
+    FAQChat,
     About,
     TrainerAbout,
     CareerImpact,

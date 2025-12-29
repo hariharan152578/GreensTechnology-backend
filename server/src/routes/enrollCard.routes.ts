@@ -1,28 +1,42 @@
 import { Router } from "express";
 import {
   getEnrollCards,
-  getEnrollCardsAdmin,
   createEnrollCard,
   updateEnrollCard,
   deleteEnrollCard,
-  updateEnrollCardOrder,
-  hardDeleteEnrollCard, // optional
+  getAllEnrollCardsForAdmin,
+  hardDeleteEnrollCard,
+  restoreEnrollCard
 } from "../controllers/enrollCard.controller";
-import { upload } from "../middlewares/upload.middleware";
+import { 
+  uploadEnrollCardImage,
+  handleUploadError 
+} from "../middlewares/upload.middleware";
+import { authenticateAdmin } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-// Public endpoint (for frontend)
+// Public route (for frontend)
 router.get("/", getEnrollCards);
 
-// Admin endpoints
-router.get("/admin", getEnrollCardsAdmin);
-router.post("/", upload.single("image"), createEnrollCard);
-router.put("/:id", upload.single("image"), updateEnrollCard);
-router.put("/update-order", updateEnrollCardOrder);
-router.delete("/:id", deleteEnrollCard);
-
-// Optional: Hard delete endpoint
-router.delete("/hard/:id", hardDeleteEnrollCard);
+// Admin routes
+router.get("/admin/all", authenticateAdmin, getAllEnrollCardsForAdmin);
+router.post(
+  "/", 
+  authenticateAdmin,
+  uploadEnrollCardImage.single("image"),
+  handleUploadError,
+  createEnrollCard
+);
+router.put(
+  "/:id", 
+  authenticateAdmin,
+  uploadEnrollCardImage.single("image"),
+  handleUploadError,
+  updateEnrollCard
+);
+router.delete("/:id", authenticateAdmin, deleteEnrollCard); // Soft delete
+router.delete("/:id/hard", authenticateAdmin, hardDeleteEnrollCard); // Hard delete
+router.put("/:id/restore", authenticateAdmin, restoreEnrollCard); // Restore
 
 export default router;

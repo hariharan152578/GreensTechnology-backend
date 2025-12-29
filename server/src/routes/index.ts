@@ -1,8 +1,8 @@
 import { Router } from "express";
 import heroRoutes from "./hero.routes";
 import domainRoutes from "./domain.routes";
-import enrollRoutes from "./enroll.routes";
-import enrollRequestRoutes from "./enrollRequest.routes";
+import faqChatRoutes from "./faqChat.routes"
+import enrollmentRequestRoutes from "./enrollmentRequest.routes"
 import enrollCardRoutes from "./enrollCard.routes";
 import aboutRoutes from "./about.routes";
 import trainerAboutRoutes from "./trainerAbout.routes";
@@ -22,9 +22,9 @@ const router = Router();
 
 router.use("/hero", heroRoutes);
 router.use("/domain", domainRoutes);
-router.use("/enrollments", enrollRoutes);
-router.use("/enrollments", enrollCardRoutes);
-router.use("/enrollments", enrollRequestRoutes);
+router.use("/enroll-cards", enrollCardRoutes);
+router.use("/enrollments", enrollmentRequestRoutes);
+router.use("/faq-chat", faqChatRoutes);
 router.use("/about", aboutRoutes);
 router.use("/trainer-about", trainerAboutRoutes);
 router.use("/career-impact", careerImpactRoutes);
