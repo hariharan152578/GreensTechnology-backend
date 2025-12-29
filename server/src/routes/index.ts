@@ -16,16 +16,20 @@ import techStackRoutes from "./techStack.routes";
 import projectRoutes from "./project.routes";
 import moduleRoutes from "./module.routes";
 
-/* ---------- STUDENT / LEARNING ---------- */
+/* ---------- STUDENT ---------- */
 import studyMaterialRoutes from "./studyMaterial.routes";
 import studentSuccessRoutes from "./studentSuccess.routes";
 
-/* ---------- ENROLLMENT (NEW) ---------- */
+/* ---------- ENROLLMENT ---------- */
 import enrollCardRoutes from "./enrollCard.routes";
 import enrollmentRequestRoutes from "./enrollmentRequest.routes";
 
-/*------------chatbot------------- */
+/* ---------- CHATBOT ---------- */
 import faqChatRoutes from "./faqChat.routes";
+
+/* ---------- 🔔 NOTICE ---------- */
+import noticeRoutes from "./notice.routes";
+
 const router = Router();
 
 /* ===============================
@@ -44,15 +48,27 @@ router.use("/testimonials", testimonialRoutes);
 router.use("/videos", videoRoutes);
 router.use("/tech-stack", techStackRoutes);
 router.use("/projects", projectRoutes);
-router.use("/modules", moduleRoutes);router.use("/materials", studyMaterialRoutes);
+router.use("/modules", moduleRoutes);
+router.use("/materials", studyMaterialRoutes);
 router.use("/student-success", studentSuccessRoutes);
 
 /* ===============================
-   ENROLLMENT ROUTES
+   ENROLLMENT
 ================================ */
 
 router.use("/enroll-cards", enrollCardRoutes);
 router.use("/enrollments", enrollmentRequestRoutes);
+
+/* ===============================
+   NOTICES (🔥 REQUIRED)
+================================ */
+
+router.use("/notices", noticeRoutes);
+
+/* ===============================
+   FAQ CHAT
+================================ */
+
 router.use("/faq-chat", faqChatRoutes);
 
 export default router;
