@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import  Notice  from '../model/Notice';
+import  Notice  from '../models/Notice';
 
 /**
  * @description Get all active notices (Used by the Marquee/Navbar)
