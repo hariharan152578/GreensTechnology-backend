@@ -410,3 +410,59 @@ export const uploadVideoThumbnailImage = multer({
   },
 });
 
+/* =====================================================
+   🟦 ENROLL CARD IMAGE UPLOAD
+===================================================== */
+const enrollCardDir = "uploads/enroll-cards";
+ensureDir(enrollCardDir);
+
+const enrollCardStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, enrollCardDir),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+  },
+});
+
+export const uploadEnrollCardImage = multer({
+  storage: enrollCardStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = /jpg|jpeg|png|webp/;
+    const valid =
+      allowed.test(file.mimetype) &&
+      allowed.test(path.extname(file.originalname).toLowerCase());
+
+    if (!valid) return cb(new Error("Only image files allowed"));
+    cb(null, true);
+  },
+});
+
+/* =====================================================
+   🟩 ENROLLMENT PROOF IMAGE UPLOAD
+===================================================== */
+const enrollmentProofDir = "uploads/enrollment-proofs";
+ensureDir(enrollmentProofDir);
+
+const enrollmentProofStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, enrollmentProofDir),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, "_")}${ext}`);
+  },
+});
+
+export const uploadEnrollmentProof = multer({
+  storage: enrollmentProofStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = /jpg|jpeg|png|webp/;
+    const valid =
+      allowed.test(file.mimetype) &&
+      allowed.test(path.extname(file.originalname).toLowerCase());
+
+    if (!valid) return cb(new Error("Only image files allowed"));
+    cb(null, true);
+  },
+});
+

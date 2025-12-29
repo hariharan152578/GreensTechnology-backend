@@ -3,9 +3,6 @@ import { User } from "../models/User.model";
 import { Domain } from "../models/Domain.model";
 import { Course } from "../models/Course.model";
 import { Hero } from "../models/Hero.model";
-import { Enroll } from "../models/Enroll.model";
-import { EnrollCard } from "../models/EnrollCard.model";
-import { EnrollRequest } from "../models/EnrollRequest.model";
 import { About } from "../models/About.model";
 import { TrainerAbout } from "../models/TrainerAbout.model";
 import { CareerImpact } from "../models/CareerImpact.model";
@@ -19,6 +16,10 @@ import { Project } from "../models/Project.model";
 import { ProjectTech } from "../models/ProjectTech.model";
 import { VideoTestimonial } from "../models/VideoTestimonial.model";
 import { TechStack } from "../models/TechStack.model";
+import { EnrollmentRequest } from "../models/EnrollmentRequest.model";
+import { EnrollCard } from "../models/EnrollCard.model";
+import { FaqChat } from "../models/FaqChat.model";
+
 export const sequelize = new Sequelize({
   dialect: "mysql",
   host: process.env.DB_HOST || "localhost",
@@ -31,9 +32,6 @@ export const sequelize = new Sequelize({
     Hero,
     Domain,
     Course,
-    Enroll,
-    EnrollCard,
-    EnrollRequest,
     About,
     TrainerAbout,
     CareerImpact,
@@ -44,9 +42,13 @@ export const sequelize = new Sequelize({
     ModuleTopic,
     Module ,
     Project,
+    EnrollCard,
+    EnrollmentRequest,
   ProjectTech, 
   VideoTestimonial,
-  TechStack
+  TechStack,
+  FaqChat,
+
   ],
   logging: false,
 });
