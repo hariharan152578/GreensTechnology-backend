@@ -95,8 +95,8 @@ export const updateHero = async (req: Request, res: Response) => {
       title: req.body.title ?? hero.title,
       subtitle: req.body.subtitle ?? hero.subtitle,
       description: req.body.description ?? hero.description,
-      ctaText: req.body.ctaText ?? hero.ctaText,
-      ctaLink: req.body.ctaLink ?? hero.ctaLink,
+      // ctaText: req.body.ctaText ?? hero.ctaText,
+      // ctaLink: req.body.ctaLink ?? hero.ctaLink,
       images: updatedImages,
 
       // 🔥 RUNNING TEXT
