@@ -406,28 +406,32 @@ export const uploadProjectThumbnail = multer({
 /* =====================================================
    📚 STUDY MATERIAL FILE UPLOAD
 ===================================================== */
-const materialDir = "uploads/materials";
+const materialDir = "uploads/study-materials";
 ensureDir(materialDir);
 
 const materialStorage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, materialDir),
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, "_")}${ext}`);
+    const nameOnly = path.basename(file.originalname, ext).replace(/\s+/g, "_");
+    cb(null, `${Date.now()}-${nameOnly}${ext}`);
   },
 });
 
 export const uploadStudyMaterial = multer({
   storage: materialStorage,
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
-  fileFilter: (_req, file, cb) => {
-    const allowed = /pdf|docx|ppt|pptx|mp4|webm/;
-    const ext = path.extname(file.originalname).toLowerCase(); 
+  limits: { fileSize: 100 * 1024 * 1024 },
+  // FIX: Remove explicit 'Request' type to prevent conflict with browser types
+  // Multer's internal types will automatically apply the correct Express Request type
+  fileFilter: (req, file, cb) => {
+    const allowed = [".pdf", ".docx", ".doc", ".ppt", ".pptx", ".mp4", ".webm"];
+    const ext = path.extname(file.originalname).toLowerCase();
 
-    if (!allowed.test(ext)) {
-      return cb(new Error("Unsupported file type"));
+    if (allowed.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Unsupported file type") as any, false);
     }
-    cb(null, true);
   },
 });
  /* =====================================================

@@ -62,7 +62,7 @@ export const login = async (req: Request, res: Response) => {
       id: admin.id, 
       email: admin.email,
       username: admin.username || 'Admin' // Get from DB
-    }, JWT_SECRET, { expiresIn: '1h' });
+    }, JWT_SECRET, { expiresIn: "7d" });
 
     res.json({ message: 'Login successful', token });
   } catch (error: any) {

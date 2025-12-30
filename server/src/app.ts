@@ -2,7 +2,7 @@
   import cors from "cors";
   import apiRoutes from "./routes/index";
   import path from "path";
-
+import fs from "fs"
   const app = express();
 const allowedOrigins = [
   'http://localhost:4000', // Your current frontend
@@ -15,15 +15,31 @@ app.use(cors({
   credentials: false, // Must be false when origin is '*'
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders:['Content-Disposition']
 }));
   app.use(express.json());
 
   /* 🔥 SERVE UPLOADS CORRECTLY */
-  app.use(
-    "/uploads",
-    express.static(path.join(process.cwd(), "uploads"))
-  );
+ app.use(
+  "/uploads/study-materials",
+  express.static(path.join(process.cwd(), "uploads", "materials"))
+);
 
+// Keep the general one for other uploads
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"), {
+    maxAge: 0,
+    etag: false, // Optional: prevents the browser from using 'If-None-Match' checks
+    lastModified: false // Optional: ensures the browser doesn't try to validate the file date
+  })
+);
+const debugPath = path.join(process.cwd(), "uploads", "materials");
+console.log("Checking folder:", debugPath);
+console.log("Folder exists?", fs.existsSync(debugPath));
+if (fs.existsSync(debugPath)) {
+  console.log("Files inside:", fs.readdirSync(debugPath));
+}
   // API ROUTES
   app.use("/api", apiRoutes);
 
