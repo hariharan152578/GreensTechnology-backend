@@ -31,11 +31,6 @@ export class Hero extends Model {
   @Column({ type: DataType.TEXT })
   description!: string;
 
-  @Column({ allowNull: false })
-  ctaText!: string;
-
-  @Column({ allowNull: false })
-  ctaLink!: string;
 
   @Column({ type: DataType.JSON })
   images!: string[]; // slider images

@@ -106,8 +106,7 @@ export const createHero = async (req: Request, res: Response) => {
       title: req.body.title,
       subtitle: req.body.subtitle,
       description: req.body.description || '',
-      ctaText: req.body.ctaText,
-      ctaLink: req.body.ctaLink,
+
       images: imageUrls,
       runningTexts: req.body.runningTexts ? JSON.parse(req.body.runningTexts) : [],
       isActive: req.body.isActive === 'true' || req.body.isActive === true,
@@ -166,8 +165,7 @@ export const updateHero = async (req: Request, res: Response) => {
       title: req.body.title || hero.title,
       subtitle: req.body.subtitle || hero.subtitle,
       description: req.body.description || hero.description,
-      ctaText: req.body.ctaText || hero.ctaText,
-      ctaLink: req.body.ctaLink || hero.ctaLink,
+
       domainId: Number(req.body.domainId),
       courseId: Number(req.body.courseId),
       images: finalImagesArray, // This saves the cleaned array to DB
