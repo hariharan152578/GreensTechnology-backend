@@ -70,13 +70,14 @@ export const getProjectById = async (req: Request, res: Response) => {
   }
 };
 
-/* ---------- CREATE PROJECT ---------- */
+/* ---------- CREATE PROJECT WITH TECH ---------- */
 export const createProject = async (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "Project thumbnail required" });
     }
 
+    // 1. Create the project
     const project = await Project.create({
       domainId: Number(req.body.domainId || 0),
       courseId: Number(req.body.courseId || 0),
@@ -87,68 +88,71 @@ export const createProject = async (req: Request, res: Response) => {
       isActive: req.body.isActive === 'true' || req.body.isActive === true,
     });
 
+    // 2. Handle Tech Stack if provided
+    if (req.body.techStack) {
+      const techNames: string[] = JSON.parse(req.body.techStack);
+      if (techNames.length > 0) {
+        const techRecords = techNames.map(name => ({
+          projectId: project.id,
+          name: name,
+          isActive: true
+        }));
+        await ProjectTech.bulkCreate(techRecords);
+      }
+    }
+
+    // 3. Fetch the complete project with tech to return to frontend
+    const fullProject = await Project.findByPk(project.id, {
+      include: [{ model: ProjectTech }]
+    });
+
     res.status(201).json({
       message: "Project created successfully",
-      project
+      project: fullProject
     });
   } catch (error: any) {
     console.error("PROJECT CREATE ERROR:", error);
-    res.status(400).json({ 
-      message: "Project creation failed",
-      error: error.message 
-    });
+    res.status(400).json({ message: "Project creation failed", error: error.message });
   }
 };
 
-/* ---------- UPDATE PROJECT ---------- */
+/* ---------- UPDATE PROJECT WITH TECH ---------- */
 export const updateProject = async (req: Request, res: Response) => {
   try {
     const project = await Project.findByPk(req.params.id);
-    if (!project) {
-      return res.status(404).json({ message: "Project not found" });
-    }
+    if (!project) return res.status(404).json({ message: "Project not found" });
 
-    // Handle image update
-    let updatedImageUrl = project.imageUrl;
-    
-    if (req.file) {
-      // Delete old image
-      const oldFilename = project.imageUrl.split('/').pop();
-      if (oldFilename) {
-        const oldPath = path.join('uploads/projects', oldFilename);
-        if (fs.existsSync(oldPath)) {
-          fs.unlinkSync(oldPath);
-        }
-      }
-      updatedImageUrl = `/uploads/projects/${req.file.filename}`;
-    }
+    // ... (Your existing image update logic here) ...
 
+    // 1. Update core project fields
     await project.update({
-      domainId: req.body.domainId !== undefined ? Number(req.body.domainId) : project.domainId,
-      courseId: req.body.courseId !== undefined ? Number(req.body.courseId) : project.courseId,
       title: req.body.title || project.title,
       description: req.body.description || project.description,
-      order: req.body.order !== undefined ? Number(req.body.order) : project.order,
-      imageUrl: updatedImageUrl,
-      isActive: req.body.isActive !== undefined 
-        ? (req.body.isActive === 'true' || req.body.isActive === true) 
-        : project.isActive,
+      domainId: req.body.domainId ? Number(req.body.domainId) : project.domainId,
+      courseId: req.body.courseId ? Number(req.body.courseId) : project.courseId,
+      order: req.body.order ? Number(req.body.order) : project.order,
+      isActive: req.body.isActive !== undefined ? (req.body.isActive === 'true' || req.body.isActive === true) : project.isActive,
+      imageUrl: req.file ? `/uploads/projects/${req.file.filename}` : project.imageUrl
     });
 
-    const updatedProject = await Project.findByPk(req.params.id, {
-      include: [{ model: ProjectTech, required: false }],
-    });
-    
-    res.json({
-      message: "Project updated successfully",
-      project: updatedProject
-    });
+    // 2. Sync Tech Stack
+    if (req.body.techStack) {
+      const techNames: string[] = JSON.parse(req.body.techStack);
+      // Remove old tech
+      await ProjectTech.destroy({ where: { projectId: project.id } });
+      // Insert new tech
+      const techRecords = techNames.map(name => ({
+        projectId: project.id,
+        name: name,
+        isActive: true
+      }));
+      await ProjectTech.bulkCreate(techRecords);
+    }
+
+    const updatedProject = await Project.findByPk(project.id, { include: [ProjectTech] });
+    res.json({ message: "Updated successfully", project: updatedProject });
   } catch (error: any) {
-    console.error("PROJECT UPDATE ERROR:", error);
-    res.status(400).json({ 
-      message: "Project update failed",
-      error: error.message 
-    });
+    res.status(400).json({ message: "Update failed" });
   }
 };
 

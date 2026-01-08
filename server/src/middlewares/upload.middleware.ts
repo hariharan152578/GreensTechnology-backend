@@ -190,17 +190,17 @@ const storage = multer.diskStorage({
   },
 });
 
-export const uploadDomainImages = multer({
+export const uploadDomainVideo = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
   fileFilter: (_req, file, cb) => {
-    const allowed = /jpg|jpeg|png|webp/;
+    const allowed = /mp4|webm|ogg/;
     const valid =
       allowed.test(file.mimetype) &&
       allowed.test(path.extname(file.originalname).toLowerCase());
 
     if (!valid) {
-      return cb(new Error("Only image files allowed"));
+      return cb(new Error("Only video files allowed"));
     }
     cb(null, true);
   },
@@ -401,6 +401,58 @@ export const uploadProjectThumbnail = multer({
     }
     cb(null, true);
   },
+});
+
+//mail upload
+const mailDir = "uploads/mail-attachments";
+ensureDir(mailDir);
+// Storage config
+const mailStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, mailDir);
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const base = path
+      .basename(file.originalname, ext)
+      .replace(/\s+/g, "_");
+
+    cb(null, `${Date.now()}-${base}${ext}`);
+  },
+});
+
+// File filter
+const fileFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
+  const allowedExt = [
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".ppt",
+    ".pptx",
+    ".xls",
+    ".xlsx",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".zip",
+  ];
+
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  if (allowedExt.includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Unsupported attachment type"));
+  }
+};
+
+// ✅ Export multer instance
+export const mailUpload = multer({
+  storage: mailStorage, // ✅ CORRECT KEY
+  limits: {
+    fileSize: 25 * 1024 * 1024, // 25MB
+  },
+  fileFilter,
 });
 
 /* =====================================================

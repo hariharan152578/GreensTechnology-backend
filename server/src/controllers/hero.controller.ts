@@ -1,207 +1,3 @@
-// import { Request, Response } from "express";
-// import { Hero } from "../models/Hero.model";
-// import path from "path";
-// import fs from "fs";
-// /* ---------- GET (Frontend) ---------- */
-// export const getHeroData = async (req: Request, res: Response) => {
-//   try {
-//     const domainId = Number(req.query.domainId || 0);
-//     const courseId = Number(req.query.courseId || 0);
-
-//     let hero = await Hero.findOne({
-//       where: { domainId, courseId, isActive: true },
-//     });
-
-//     if (!hero && domainId > 0 && courseId > 0) {
-//       hero = await Hero.findOne({
-//         where: { domainId, courseId: 0, isActive: true },
-//       });
-//     }
-
-//     if (!hero) {
-//       hero = await Hero.findOne({
-//         where: { domainId: 0, courseId: 0, isActive: true },
-//       });
-//     }
-
-//     if (!hero) {
-//       return res.status(404).json({ message: "Hero data not found" });
-//     }
-
-//     res.json(hero);
-//   } catch (error) {
-//     res.status(500).json({ message: "Failed to fetch hero data" });
-//   }
-// };
-
-// /* ---------- ADMIN: Get all heroes ---------- */
-// export const getAllHeroesForAdmin = async (req:Request, res:Response) => {
-//   try {
-//     const heroes = await Hero.findAll({
-//       order: [['createdAt', 'DESC']]
-//     });
-//     console.log(`Found ${heroes.length} heroes`);
-//     res.json(heroes);
-//   } catch (error) {
-//     console.error("Error fetching all heroes:", error);
-//     res.status(500).json({ message: "Failed to fetch all heroes" });
-//   }
-// };
-
-// /* ---------- ADMIN: Get hero by ID ---------- */
-// export const getHeroByIdForAdmin = async (req:Request, res:Response) => {
-//   try {
-//     const hero = await Hero.findByPk(req.params.id);
-//     if (!hero) {
-//       return res.status(404).json({ message: "Hero not found" });
-//     }
-//     res.json(hero);
-//   } catch (error) {
-//     console.error("Error fetching hero by ID:", error);
-//     res.status(500).json({ message: "Failed to fetch hero" });
-//   }
-// };
-
-// /* ---------- ADMIN: Create hero ---------- */
-// export const createHero = async (req:Request, res:Response) => {
-//   try {
-//     const files = req.files || [];
-    
-//     if (!files || files.length === 0) {
-//       return res.status(400).json({ message: "At least one hero image is required" });
-//     }
-
-//     const imageUrls = files.map(
-//       (file) => `/uploads/heroes/${file.filename}`
-//     );
-
-//     const heroData = {
-//       domainId: Number(req.body.domainId || 0),
-//       courseId: Number(req.body.courseId || 0),
-//       title: req.body.title,
-//       subtitle: req.body.subtitle,
-//       description: req.body.description || '',
-//       ctaText: req.body.ctaText,
-//       ctaLink: req.body.ctaLink,
-//       images: imageUrls,
-//       runningTexts: req.body.runningTexts ? JSON.parse(req.body.runningTexts) : [],
-//       isActive: req.body.isActive === 'true' || req.body.isActive === true,
-//     };
-
-//     const hero = await Hero.create(heroData);
-
-//     res.status(201).json({
-//       message: "Hero created successfully",
-//       hero
-//     });
-//   } catch (error) {
-//     console.error("Error creating hero:", error);
-//     res.status(400).json({
-//       message: "Failed to create hero",
-//       error: error.message,
-//     });
-//   }
-// };
-
-// /* ---------- ADMIN: Update hero ---------- */
-// export const updateHero = async (req:Request, res:Response) => {
-//   try {
-//     const hero = await Hero.findByPk(req.params.id);
-//     if (!hero) {
-//       return res.status(404).json({ message: "Hero not found" });
-//     }
-
-//     const files = req.files || [];
-//     let updatedImages = [...hero.images];
-
-//     // Add new images if any
-//     if (files.length > 0) {
-//       const newImageUrls = files.map(file => `/uploads/heroes/${file.filename}`);
-//       updatedImages = [...updatedImages, ...newImageUrls];
-//     }
-
-//     // Remove images that were deleted in frontend
-//     const existingImages = hero.images || [];
-//     const removedImages = existingImages.filter(img => 
-//       !req.body.existingImages || !req.body.existingImages.includes(img)
-//     );
-    
-//     // Delete removed images from server
-//     removedImages.forEach(imgPath => {
-//       const filename = imgPath.split('/').pop();
-//       const filePath = path.join('uploads/heroes', filename);
-//       if (fs.existsSync(filePath)) {
-//         fs.unlinkSync(filePath);
-//       }
-//     });
-
-//     // Filter out removed images
-//     updatedImages = updatedImages.filter(img => !removedImages.includes(img));
-
-//     const heroData = {
-//       domainId: req.body.domainId ? Number(req.body.domainId) : hero.domainId,
-//       courseId: req.body.courseId ? Number(req.body.courseId) : hero.courseId,
-//       title: req.body.title || hero.title,
-//       subtitle: req.body.subtitle || hero.subtitle,
-//       description: req.body.description || hero.description,
-//       ctaText: req.body.ctaText || hero.ctaText,
-//       ctaLink: req.body.ctaLink || hero.ctaLink,
-//       images: updatedImages,
-//       runningTexts: req.body.runningTexts ? JSON.parse(req.body.runningTexts) : hero.runningTexts,
-//       isActive: req.body.isActive === 'true' || req.body.isActive === 'true' ? true : 
-//                 req.body.isActive === 'false' ? false : hero.isActive,
-//     };
-
-//     await hero.update(heroData);
-
-//     res.json({
-//       message: "Hero updated successfully",
-//       hero: await Hero.findByPk(req.params.id) // Return fresh data
-//     });
-//   } catch (error) {
-//     console.error("Error updating hero:", error);
-//     res.status(400).json({
-//       message: "Failed to update hero",
-//       error: error.message,
-//     });
-//   }
-// };
-
-// /* ---------- ADMIN: Delete hero ---------- */
-// export const deleteHero = async (req:Request, res:Response) => {
-//   try {
-//     const hero = await Hero.findByPk(req.params.id);
-//     if (!hero) {
-//       return res.status(404).json({ message: "Hero not found" });
-//     }
-
-//     // Delete associated images
-//     if (hero.images && hero.images.length > 0) {
-//       hero.images.forEach(imgPath => {
-//         const filename = imgPath.split('/').pop();
-//         const filePath = path.join('uploads/heroes', filename);
-//         if (fs.existsSync(filePath)) {
-//           fs.unlinkSync(filePath);
-//         }
-//       });
-//     }
-
-//     await hero.destroy();
-    
-//     res.json({ 
-//       message: "Hero deleted successfully",
-//       success: true
-//     });
-//   } catch (error) {
-//     console.error("Error deleting hero:", error);
-//     res.status(400).json({ 
-//       message: "Failed to delete hero",
-//       error: error.message
-//     });
-//   }
-// };
-
-
 import { Request, Response } from "express";
 import { Hero } from "../models/Hero.model";
 import path from "path";
@@ -336,75 +132,57 @@ export const createHero = async (req: Request, res: Response) => {
 export const updateHero = async (req: Request, res: Response) => {
   try {
     const hero = await Hero.findByPk(req.params.id);
-    if (!hero) {
-      return res.status(404).json({ message: "Hero not found" });
-    }
+    if (!hero) return res.status(404).json({ message: "Hero not found" });
 
     const files = getFiles(req);
-    let updatedImages = [...hero.images];
-
-    // Add new images if any
-    if (files.length > 0) {
-      const newImageUrls = files.map((file: UploadedFile) => `/uploads/heroes/${file.filename}`);
-      updatedImages = [...updatedImages, ...newImageUrls];
+    
+    // 1. Parse the images the user wants to KEEP
+    let keptExistingImages: string[] = [];
+    if (req.body.existingImages) {
+      keptExistingImages = JSON.parse(req.body.existingImages);
+    } else {
+      // If the field is missing, assume the user deleted ALL previous images
+      keptExistingImages = [];
     }
 
-    // Remove images that were deleted in frontend
-    const existingImages = hero.images || [];
-    let removedImages: string[] = [];
+    // 2. Identify and Delete files from the physical server that are NOT in the kept list
+    const imagesToDelete = hero.images.filter(img => !keptExistingImages.includes(img));
     
-    try {
-      const existingImagesFromBody = req.body.existingImages 
-        ? JSON.parse(req.body.existingImages) 
-        : [];
-      
-      removedImages = existingImages.filter(img => 
-        !existingImagesFromBody.includes(img)
-      );
-    } catch (e) {
-      console.warn("Error parsing existingImages, assuming all should be kept");
-    }
-    
-    // Delete removed images from server
-    removedImages.forEach(imgPath => {
-      const filename = imgPath.split('/').pop();
-      if (filename) {
-        const filePath = path.join('uploads/heroes', filename);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
+    imagesToDelete.forEach(imgPath => {
+      const filePath = path.join(process.cwd(), imgPath); // Use absolute path
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
       }
     });
 
-    // Filter out removed images
-    updatedImages = updatedImages.filter(img => !removedImages.includes(img));
+    // 3. Process new uploads
+    const newImageUrls = files.map(file => `/uploads/heroes/${file.filename}`);
 
+    // 4. Combine: Kept Old Images + Brand New Images (Appended to the end)
+    const finalImagesArray = [...keptExistingImages, ...newImageUrls];
+
+    // 5. Update the Record
     const heroData = {
-      domainId: req.body.domainId ? Number(req.body.domainId) : hero.domainId,
-      courseId: req.body.courseId ? Number(req.body.courseId) : hero.courseId,
       title: req.body.title || hero.title,
       subtitle: req.body.subtitle || hero.subtitle,
       description: req.body.description || hero.description,
       ctaText: req.body.ctaText || hero.ctaText,
       ctaLink: req.body.ctaLink || hero.ctaLink,
-      images: updatedImages,
+      domainId: Number(req.body.domainId),
+      courseId: Number(req.body.courseId),
+      images: finalImagesArray, // This saves the cleaned array to DB
       runningTexts: req.body.runningTexts ? JSON.parse(req.body.runningTexts) : hero.runningTexts,
-      isActive: req.body.isActive === 'true' || req.body.isActive === true ? true : 
-                req.body.isActive === 'false' ? false : hero.isActive,
+      isActive: req.body.isActive === 'true' || req.body.isActive === true,
     };
 
     await hero.update(heroData);
 
     res.json({
-      message: "Hero updated successfully",
-      hero: await Hero.findByPk(req.params.id) // Return fresh data
+      message: "Hero updated and images synced successfully",
+      hero
     });
   } catch (error: any) {
-    console.error("Error updating hero:", error);
-    res.status(400).json({
-      message: "Failed to update hero",
-      error: error.message,
-    });
+    res.status(400).json({ message: "Update failed", error: error.message });
   }
 };
 

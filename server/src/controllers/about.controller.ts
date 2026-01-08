@@ -63,8 +63,7 @@ export const getAllAbouts = async (req: Request, res: Response) => {
 export const createAbout = async (req: Request, res: Response) => {
   try {
     const mainFiles = getFiles(req, 'mainImages');
-    const smallFiles = getFiles(req, 'smallImages');
-
+    
     if (mainFiles.length === 0) {
       return res.status(400).json({ message: "Main images are required" });
     }
@@ -73,9 +72,7 @@ export const createAbout = async (req: Request, res: Response) => {
       (file) => `/uploads/about/${file.filename}`
     );
 
-    const smallImages = smallFiles.map(
-      (file) => `/uploads/about/${file.filename}`
-    );
+ 
 
     const about = await About.create({
       domainId: Number(req.body.domainId || 0),
@@ -85,7 +82,6 @@ export const createAbout = async (req: Request, res: Response) => {
       description1: req.body.description1,
       description2: req.body.description2 || '',
       mainImages,
-      smallImages,
       isActive: req.body.isActive === 'true' || req.body.isActive === true,
     });
 
@@ -102,7 +98,8 @@ export const createAbout = async (req: Request, res: Response) => {
   }
 };
 
-/* ---------- UPDATE ---------- */
+
+
 export const updateAbout = async (req: Request, res: Response) => {
   try {
     const about = await About.findByPk(req.params.id);
@@ -110,73 +107,37 @@ export const updateAbout = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "About section not found" });
     }
 
-    // Get new uploaded files
-    const newMainFiles = getFiles(req, 'mainImages');
-    const newSmallFiles = getFiles(req, 'smallImages');
-
-    // Parse existing images from request body
-    let existingMainImages: string[] = [];
-    let existingSmallImages: string[] = [];
+    // 1. Parse existing images (the ones the user KEPT)
+    let keptMainImages: string[] = [];
     
     try {
-      existingMainImages = req.body.existingMainImages 
-        ? JSON.parse(req.body.existingMainImages) 
-        : [];
-      existingSmallImages = req.body.existingSmallImages 
-        ? JSON.parse(req.body.existingSmallImages) 
-        : [];
+      keptMainImages = req.body.existingMainImages ? JSON.parse(req.body.existingMainImages) : [];
     } catch (e) {
-      console.warn("Error parsing existing images:", e);
-      // If parsing fails, assume no existing images should be kept
-      existingMainImages = [];
-      existingSmallImages = [];
+      keptMainImages = about.mainImages; // Fallback to current if parse fails
     }
 
-    // Prepare updated image arrays
-    let updatedMainImages = [...existingMainImages];
-    let updatedSmallImages = [...existingSmallImages];
+    // 2. Identify and Delete files removed by the user
+    const imagesToRemove = [
+      ...(about.mainImages || []).filter(img => !keptMainImages.includes(img)),
+    ];
 
-    // Add new main images
-    if (newMainFiles.length > 0) {
-      const newMainImagePaths = newMainFiles.map(
-        (file) => `/uploads/about/${file.filename}`
-      );
-      updatedMainImages = [...updatedMainImages, ...newMainImagePaths];
-    }
+    imagesToRemove.forEach(imgPath => {
+      // imgPath is like "/uploads/about/123.jpg"
+      // we need to reach "uploads/about/123.jpg"
+      const relativePath = imgPath.startsWith('/') ? imgPath.substring(1) : imgPath;
+      const fullPath = path.join(process.cwd(), relativePath);
+      
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+    });
 
-    // Add new small images
-    if (newSmallFiles.length > 0) {
-      const newSmallImagePaths = newSmallFiles.map(
-        (file) => `/uploads/about/${file.filename}`
-      );
-      updatedSmallImages = [...updatedSmallImages, ...newSmallImagePaths];
-    }
+    // 3. Process New Uploads
+    const newMainFiles = getFiles(req, 'mainImages');
 
-    // Find removed images to delete from server
-    const removedMainImages = (about.mainImages || []).filter(img => 
-      !existingMainImages.includes(img)
-    );
-    
-    const removedSmallImages = (about.smallImages || []).filter(img => 
-      !existingSmallImages.includes(img)
-    );
+    const newMainPaths = newMainFiles.map(f => `/uploads/about/${f.filename}`);
 
-    // Delete removed files from disk
-    const deleteImageFiles = (imagePaths: string[]) => {
-      imagePaths.forEach(imgPath => {
-        const filename = imgPath.split('/').pop();
-        if (filename) {
-          const filePath = path.join('uploads/about', filename);
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-        }
-      });
-    };
-
-    deleteImageFiles([...removedMainImages, ...removedSmallImages]);
-
-    // Update the about section
+    // 4. Update Database
     await about.update({
       domainId: req.body.domainId ? Number(req.body.domainId) : about.domainId,
       courseId: req.body.courseId ? Number(req.body.courseId) : about.courseId,
@@ -184,26 +145,16 @@ export const updateAbout = async (req: Request, res: Response) => {
       heading: req.body.heading || about.heading,
       description1: req.body.description1 || about.description1,
       description2: req.body.description2 || about.description2,
-      mainImages: updatedMainImages,
-      smallImages: updatedSmallImages,
+      // Combine what was kept + what is new
+      mainImages: [...keptMainImages, ...newMainPaths],
       isActive: req.body.isActive !== undefined 
         ? (req.body.isActive === 'true' || req.body.isActive === true) 
         : about.isActive,
     });
 
-    const updatedAbout = await About.findByPk(req.params.id);
-    
-    res.json({
-      message: "About section updated successfully",
-      about: updatedAbout
-    });
-
+    res.json({ message: "Updated successfully", about });
   } catch (error: any) {
-    console.error("Update Error:", error);
-    res.status(400).json({ 
-      message: "Failed to update about section",
-      error: error.message 
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -216,7 +167,7 @@ export const deleteAbout = async (req: Request, res: Response) => {
     }
 
     // Delete associated images
-    [...(about.mainImages || []), ...(about.smallImages || [])].forEach(imgPath => {
+    [...(about.mainImages || [])].forEach(imgPath => {
       const filename = imgPath.split('/').pop();
       if (filename) {
         const filePath = path.join('uploads/about', filename);

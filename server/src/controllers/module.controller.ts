@@ -103,13 +103,17 @@ export const getModuleById = async (req: Request, res: Response) => {
 
 /* ---------- CREATE MODULE ---------- */
 export const createModule = async (req: Request, res: Response) => {
+  // Use a transaction so if topics fail, the module isn't created alone
+  const t = await Module.sequelize?.transaction();
+
   try {
-    const { domainId, courseId, title, description, order, isActive } = req.body;
+    const { domainId, courseId, title, description, order, isActive, topics } = req.body;
     
     if (!title || title.trim() === '') {
       return res.status(400).json({ message: "Module title is required" });
     }
 
+    // 1. Create the Module
     const module = await Module.create({
       domainId: Number(domainId || 0),
       courseId: Number(courseId || 0),
@@ -117,13 +121,34 @@ export const createModule = async (req: Request, res: Response) => {
       description: description ? description.trim() : null,
       order: Number(order || 0),
       isActive: isActive === undefined ? true : isActive,
+    }, { transaction: t });
+
+    // 2. If topics exist in the request, create them linked to this module
+    if (topics && Array.isArray(topics) && topics.length > 0) {
+      const topicsWithModuleId = topics.map((topic: any) => ({
+        moduleId: module.id, // Link to the newly created module
+        title: topic.title.trim(),
+        description: topic.description ? topic.description.trim() : null,
+        order: Number(topic.order || 0),
+        isActive: topic.isActive ?? true,
+      }));
+
+      await ModuleTopic.bulkCreate(topicsWithModuleId, { transaction: t });
+    }
+
+    await t?.commit();
+
+    // 3. Fetch the full module with topics included to return to frontend
+    const fullModule = await Module.findByPk(module.id, {
+      include: [ModuleTopic]
     });
 
     res.status(201).json({
-      message: "Module created successfully",
-      module
+      message: "Module and topics created successfully",
+      module: fullModule
     });
   } catch (error: any) {
+    await t?.rollback();
     console.error("MODULE CREATE ERROR:", error);
     res.status(400).json({ 
       message: "Module creation failed", 
@@ -134,32 +159,80 @@ export const createModule = async (req: Request, res: Response) => {
 
 /* ---------- UPDATE MODULE ---------- */
 export const updateModule = async (req: Request, res: Response) => {
+  const t = await Module.sequelize?.transaction();
+
   try {
-    const module = await Module.findByPk(req.params.id);
-    
+    const { id } = req.params;
+    const { domainId, courseId, title, description, order, isActive, topics } = req.body;
+
+    const module = await Module.findByPk(id);
     if (!module) {
       return res.status(404).json({ message: "Module not found" });
     }
 
+    // 1. Update Module Basic Info
     await module.update({
-      domainId: req.body.domainId !== undefined ? Number(req.body.domainId) : module.domainId,
-      courseId: req.body.courseId !== undefined ? Number(req.body.courseId) : module.courseId,
-      title: req.body.title !== undefined ? req.body.title.trim() : module.title,
-      description: req.body.description !== undefined ? req.body.description.trim() : module.description,
-      order: req.body.order !== undefined ? Number(req.body.order) : module.order,
-      isActive: req.body.isActive !== undefined ? req.body.isActive : module.isActive,
-    });
+      domainId: domainId !== undefined ? Number(domainId) : module.domainId,
+      courseId: courseId !== undefined ? Number(courseId) : module.courseId,
+      title: title !== undefined ? title.trim() : module.title,
+      description: description !== undefined ? description.trim() : module.description,
+      order: order !== undefined ? Number(order) : module.order,
+      isActive: isActive !== undefined ? isActive : module.isActive,
+    }, { transaction: t });
 
-    res.json({
-      message: "Module updated successfully",
-      module
-    });
+    // 2. Handle Topics Sync
+    if (topics && Array.isArray(topics)) {
+      // Get IDs of topics coming from the frontend (new topics won't have real IDs yet)
+      const frontendTopicIds = topics
+        .filter((topic: any) => typeof topic.id === 'number' && topic.id < 1000000000000) // Filter out temp IDs
+        .map((topic: any) => topic.id);
+
+      // A. Remove topics that are no longer in the list
+      await ModuleTopic.destroy({
+        where: {
+          moduleId: id,
+          id: { [Symbol.for('notIn') as any]: frontendTopicIds } // Deletes topics not in frontend list
+        },
+        transaction: t
+      });
+
+      // B. Upsert (Update or Create) remaining topics
+      for (const topicData of topics) {
+        const isNew = typeof topicData.id !== 'number' || topicData.id >= 1000000000000;
+
+        if (isNew) {
+          // It's a brand new topic
+          await ModuleTopic.create({
+            moduleId: Number(id),
+            title: topicData.title.trim(),
+            description: topicData.description,
+            order: Number(topicData.order || 0),
+            isActive: topicData.isActive ?? true
+          }, { transaction: t });
+        } else {
+          // It's an existing topic, update it
+          await ModuleTopic.update({
+            title: topicData.title.trim(),
+            description: topicData.description,
+            order: Number(topicData.order || 0),
+            isActive: topicData.isActive ?? true
+          }, { 
+            where: { id: topicData.id, moduleId: id },
+            transaction: t 
+          });
+        }
+      }
+    }
+
+    await t?.commit();
+
+    const updatedModule = await Module.findByPk(id, { include: [ModuleTopic] });
+    res.json({ message: "Module and topics updated successfully", module: updatedModule });
+
   } catch (error: any) {
+    await t?.rollback();
     console.error("MODULE UPDATE ERROR:", error);
-    res.status(400).json({ 
-      message: "Module update failed", 
-      error: error.message 
-    });
+    res.status(400).json({ message: "Module update failed", error: error.message });
   }
 };
 

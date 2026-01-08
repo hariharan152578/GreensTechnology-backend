@@ -30,8 +30,7 @@ export class TrainerAbout extends Model {
   @Column({ type: DataType.JSON })
   mainImages!: string[];
 
-  @Column({ type: DataType.JSON })
-  smallImages!: string[];
+
 
   @Column({ defaultValue: true })
   isActive!: boolean;

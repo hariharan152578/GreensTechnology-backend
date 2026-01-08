@@ -40,10 +40,7 @@ export class Domain extends Model {
 
   /* ---------- IMAGES ---------- */
   @Column({ allowNull: false })
-  mainImageUrl!: string;
-
-  @Column({ allowNull: false })
-  smallImageUrl!: string;
+videoUrl!: string;
 
   /* ---------- STATUS ---------- */
   @Column({ defaultValue: true })

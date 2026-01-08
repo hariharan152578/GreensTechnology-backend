@@ -18,7 +18,9 @@ import videoRoutes from "./videoTestimonial.routes";
 import techStackRoutes from "./techStack.routes";
 import adminRoutes from "./admin.routes";
 import notice from "./notice.routes";
+import mail from "./mail.routes"
 const router = Router();
+
 
 router.use("/hero", heroRoutes);
 router.use("/domain", domainRoutes);
@@ -39,4 +41,5 @@ router.use("/videos", videoRoutes);
 router.use("/tech-stack", techStackRoutes);
 router.use("/admin", adminRoutes);
 router.use("/notices", notice);
+router.use("/mail",mail)
 export default router;

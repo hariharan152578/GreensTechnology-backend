@@ -37,9 +37,6 @@ export class About extends Model {
   @Column({ type: DataType.JSON })
   mainImages!: string[]; // slideshow images
 
-  @Column({ type: DataType.JSON })
-  smallImages!: string[];
-
   @Column({ defaultValue: true })
   isActive!: boolean;
 }

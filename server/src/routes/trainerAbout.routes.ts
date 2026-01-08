@@ -25,7 +25,6 @@ router.post(
   authenticateAdmin,
   uploadTrainerAboutImages.fields([
     { name: "mainImages", maxCount: 10 },
-    { name: "smallImages", maxCount: 10 },
   ]),
   createTrainerAbout
 );

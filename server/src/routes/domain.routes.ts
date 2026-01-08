@@ -8,7 +8,7 @@ import {
   deleteDomain,
   getAllDomainsForAdmin
 } from "../controllers/domain.controller";
-import { uploadDomainImages } from "../middlewares/upload.middleware";
+import { uploadDomainVideo } from "../middlewares/upload.middleware";
 import { authenticateAdmin } from "../middlewares/auth.middleware";
 
 const router = Router();
@@ -22,20 +22,14 @@ router.get("/admin/all", authenticateAdmin, getAllDomainsForAdmin); // GET /api/
 router.post(
   "/",
   authenticateAdmin,
-  uploadDomainImages.fields([
-    { name: "mainImage", maxCount: 1 },
-    { name: "smallImage", maxCount: 1 },
-  ]),
+  uploadDomainVideo.single("video"),
   createDomain
 );
 
 router.put(
   "/:id",
   authenticateAdmin,
-  uploadDomainImages.fields([
-    { name: "mainImage", maxCount: 1 },
-    { name: "smallImage", maxCount: 1 },
-  ]),
+  uploadDomainVideo.single("video"),
   updateDomain
 );
 

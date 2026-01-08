@@ -8,6 +8,7 @@ const allowedOrigins = [
   'http://localhost:4000', // Your current frontend
   'http://localhost:5173', // Vite default
   'http://localhost:3000', // React default
+  'http://localhost:5174',
 ];
   // app.use(cors());
 app.use(cors({

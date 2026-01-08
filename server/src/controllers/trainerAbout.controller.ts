@@ -82,11 +82,9 @@ export const createTrainerAbout = async (req: Request, res: Response) => {
   try {
     const files = req.files as {
       mainImages?: Express.Multer.File[];
-      smallImages?: Express.Multer.File[];
     };
 
     const mainImages = files?.mainImages?.map((f) => `/uploads/trainer-about/${f.filename}`) || [];
-    const smallImages = files?.smallImages?.map((f) => `/uploads/trainer-about/${f.filename}`) || [];
 
     const trainerAbout = await TrainerAbout.create({
       domainId: Number(req.body.domainId || 0),
@@ -96,7 +94,6 @@ export const createTrainerAbout = async (req: Request, res: Response) => {
       description1: req.body.description1,
       description2: req.body.description2 || null,
       mainImages,
-      smallImages,
       isActive: req.body.isActive === 'true' || req.body.isActive === true,
       // REMOVED: sortOrder: Number(req.body.sortOrder || 0),
     });
@@ -111,7 +108,6 @@ export const createTrainerAbout = async (req: Request, res: Response) => {
     // Clean up uploaded files if creation fails
     const files = req.files as {
       mainImages?: Express.Multer.File[];
-      smallImages?: Express.Multer.File[];
     };
     
     if (files?.mainImages) {
@@ -123,14 +119,7 @@ export const createTrainerAbout = async (req: Request, res: Response) => {
       });
     }
     
-    if (files?.smallImages) {
-      files.smallImages.forEach(file => {
-        const filePath = path.join("uploads", "trainer-about", file.filename);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      });
-    }
+   
     
     res.status(400).json({ 
       message: "Trainer About section creation failed",
@@ -149,11 +138,9 @@ export const updateTrainerAbout = async (req: Request, res: Response) => {
 
     const files = req.files as {
       mainImages?: Express.Multer.File[];
-      smallImages?: Express.Multer.File[];
     };
 
     let mainImages = trainerAbout.mainImages || [];
-    let smallImages = trainerAbout.smallImages || [];
     let oldImagesToDelete: string[] = [];
 
     // Handle main images update
@@ -166,15 +153,7 @@ export const updateTrainerAbout = async (req: Request, res: Response) => {
       mainImages = files.mainImages.map((f) => `/uploads/trainer-about/${f.filename}`);
     }
 
-    // Handle small images update
-    if (files?.smallImages && files.smallImages.length > 0) {
-      // Mark old images for deletion
-      oldImagesToDelete.push(...trainerAbout.smallImages.map(img => 
-        img.replace("/uploads/", "uploads/")
-      ));
-      
-      smallImages = files.smallImages.map((f) => `/uploads/trainer-about/${f.filename}`);
-    }
+
 
     // Update trainer about record
     await trainerAbout.update({
@@ -185,7 +164,6 @@ export const updateTrainerAbout = async (req: Request, res: Response) => {
       description1: req.body.description1 !== undefined ? req.body.description1 : trainerAbout.description1,
       description2: req.body.description2 !== undefined ? req.body.description2 : trainerAbout.description2,
       mainImages,
-      smallImages,
       isActive: req.body.isActive !== undefined 
         ? (req.body.isActive === 'true' || req.body.isActive === true) 
         : trainerAbout.isActive,
@@ -211,7 +189,6 @@ export const updateTrainerAbout = async (req: Request, res: Response) => {
     // Clean up uploaded files if update fails
     const files = req.files as {
       mainImages?: Express.Multer.File[];
-      smallImages?: Express.Multer.File[];
     };
     
     if (files?.mainImages) {
@@ -223,14 +200,7 @@ export const updateTrainerAbout = async (req: Request, res: Response) => {
       });
     }
     
-    if (files?.smallImages) {
-      files.smallImages.forEach(file => {
-        const filePath = path.join("uploads", "trainer-about", file.filename);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      });
-    }
+
     
     res.status(400).json({ 
       message: "Trainer About section update failed",
@@ -248,7 +218,7 @@ export const deleteTrainerAbout = async (req: Request, res: Response) => {
     }
 
     // Delete images from disk
-    const allImages = [...trainerAbout.mainImages, ...trainerAbout.smallImages];
+    const allImages = [...trainerAbout.mainImages];
     allImages.forEach(image => {
       if (image) {
         const diskPath = image.replace("/uploads/", "uploads/");

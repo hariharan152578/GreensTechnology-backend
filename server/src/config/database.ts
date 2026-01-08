@@ -20,6 +20,7 @@ import { ProjectTech } from "../models/ProjectTech.model";
 import { VideoTestimonial } from "../models/VideoTestimonial.model";
 import { TechStack } from "../models/TechStack.model";
 import { Admin } from "../models/admin.model";
+import {Contact } from "../models/mail.model"
 export const sequelize = new Sequelize({
   dialect: "mysql",
   host: process.env.DB_HOST || "localhost",
@@ -45,10 +46,11 @@ export const sequelize = new Sequelize({
     ModuleTopic,
     Module ,
     Project,
+
   ProjectTech, 
   VideoTestimonial,
   TechStack,
-  Admin
+  Admin,Contact 
   ],
   logging: false,
 });

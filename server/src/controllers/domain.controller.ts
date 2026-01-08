@@ -49,12 +49,10 @@ export const getDomainById = async (req: Request, res: Response) => {
 /* ---------- CREATE DOMAIN (WITH IMAGES) ---------- */
 export const createDomain = async (req: Request, res: Response) => {
   try {
-    const files = req.files as { [key: string]: Express.Multer.File[] } | undefined;
-    const mainImage = files?.["mainImage"]?.[0];
-    const smallImage = files?.["smallImage"]?.[0];
+    const file = req.file;
 
-    if (!mainImage || !smallImage) {
-      return res.status(400).json({ message: "Both main and small images are required" });
+    if (!file) {
+      return res.status(400).json({ message: "Video is required" });
     }
 
     const domain = await Domain.create({
@@ -65,21 +63,13 @@ export const createDomain = async (req: Request, res: Response) => {
       subtitle: req.body.subtitle,
       price: req.body.price,
       description: req.body.description,
-      mainImageUrl: `/uploads/domains/${mainImage.filename}`,
-      smallImageUrl: `/uploads/domains/${smallImage.filename}`,
-      isActive: req.body.isActive === 'true' || req.body.isActive === true,
+      videoUrl: `/uploads/domains/videos/${file.filename}`,
+      isActive: req.body.isActive === "true" || req.body.isActive === true,
     });
 
-    res.status(201).json({
-      message: "Domain created successfully",
-      domain
-    });
+    res.status(201).json({ message: "Domain created", domain });
   } catch (error: any) {
-    console.error("Error creating domain:", error);
-    res.status(400).json({ 
-      message: "Failed to create domain",
-      error: error.message 
-    });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -91,39 +81,17 @@ export const updateDomain = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Domain not found" });
     }
 
-    const files = req.files as { [key: string]: Express.Multer.File[] } | undefined;
-    const mainImage = files?.["mainImage"]?.[0];
-    const smallImage = files?.["smallImage"]?.[0];
+const file = req.file;
 
-    // Handle image updates
-    let updatedMainImageUrl = domain.mainImageUrl;
-    let updatedSmallImageUrl = domain.smallImageUrl;
-    
-    // If new main image uploaded, delete old one
-    if (mainImage) {
-      // Delete old main image
-      const oldMainFilename = domain.mainImageUrl.split('/').pop();
-      if (oldMainFilename) {
-        const oldMainPath = path.join('uploads/domains', oldMainFilename);
-        if (fs.existsSync(oldMainPath)) {
-          fs.unlinkSync(oldMainPath);
-        }
-      }
-      updatedMainImageUrl = `/uploads/domains/${mainImage.filename}`;
-    }
-    
-    // If new small image uploaded, delete old one
-    if (smallImage) {
-      // Delete old small image
-      const oldSmallFilename = domain.smallImageUrl.split('/').pop();
-      if (oldSmallFilename) {
-        const oldSmallPath = path.join('uploads/domains', oldSmallFilename);
-        if (fs.existsSync(oldSmallPath)) {
-          fs.unlinkSync(oldSmallPath);
-        }
-      }
-      updatedSmallImageUrl = `/uploads/domains/${smallImage.filename}`;
-    }
+let updatedVideoUrl = domain.videoUrl;
+if (file) {
+  const oldPath = path.join(process.cwd(), domain.videoUrl);
+  if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+
+  updatedVideoUrl = `/uploads/domains/videos/${file.filename}`;
+}
+
+ 
 
     await domain.update({
       domainId: req.body.domainId !== undefined ? Number(req.body.domainId) : domain.domainId,
@@ -133,25 +101,19 @@ export const updateDomain = async (req: Request, res: Response) => {
       subtitle: req.body.subtitle || domain.subtitle,
       price: req.body.price || domain.price,
       description: req.body.description || domain.description,
-      mainImageUrl: updatedMainImageUrl,
-      smallImageUrl: updatedSmallImageUrl,
+      videoUrl: updatedVideoUrl,
       isActive: req.body.isActive !== undefined 
         ? (req.body.isActive === 'true' || req.body.isActive === true) 
         : domain.isActive,
     });
 
-    const updatedDomain = await Domain.findByPk(req.params.id);
-    
     res.json({
       message: "Domain updated successfully",
-      domain: updatedDomain
+      domain: await domain.reload()
     });
   } catch (error: any) {
-    console.error("Error updating domain:", error);
-    res.status(400).json({ 
-      message: "Failed to update domain",
-      error: error.message 
-    });
+    console.error("Update Error:", error);
+    res.status(400).json({ message: "Failed to update", error: error.message });
   }
 };
 
@@ -163,35 +125,27 @@ export const deleteDomain = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Domain not found" });
     }
 
-    // Delete associated images
-    const mainFilename = domain.mainImageUrl.split('/').pop();
-    const smallFilename = domain.smallImageUrl.split('/').pop();
-    
-    if (mainFilename) {
-      const mainPath = path.join('uploads/domains', mainFilename);
-      if (fs.existsSync(mainPath)) {
-        fs.unlinkSync(mainPath);
-      }
-    }
-    
-    if (smallFilename) {
-      const smallPath = path.join('uploads/domains', smallFilename);
-      if (fs.existsSync(smallPath)) {
-        fs.unlinkSync(smallPath);
+    // Delete associated video file
+    const videoFilename = domain.videoUrl?.split("/").pop();
+
+    if (videoFilename) {
+      const videoPath = path.join("uploads/domains/videos", videoFilename);
+      if (fs.existsSync(videoPath)) {
+        fs.unlinkSync(videoPath);
       }
     }
 
     await domain.destroy();
-    
-    res.json({ 
+
+    res.json({
       message: "Domain deleted permanently",
-      success: true
+      success: true,
     });
   } catch (error: any) {
     console.error("Error deleting domain:", error);
-    res.status(400).json({ 
+    res.status(400).json({
       message: "Failed to delete domain",
-      error: error.message
+      error: error.message,
     });
   }
 };
