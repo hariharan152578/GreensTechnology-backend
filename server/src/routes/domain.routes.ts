@@ -1,4 +1,3 @@
-// routes/domain.routes.ts
 import { Router } from "express";
 import {
   getDomains,
@@ -6,30 +5,31 @@ import {
   createDomain,
   updateDomain,
   deleteDomain,
-  getAllDomainsForAdmin
+  getAllDomainsForAdmin,
 } from "../controllers/domain.controller";
-import { uploadDomainVideo } from "../middlewares/upload.middleware";
+import { uploadDomainThumbnail } from "../middlewares/upload.middleware";
 import { authenticateAdmin } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-/* ---------- PUBLIC ROUTES ---------- */
-router.get("/", getDomains); // GET /api/domain - public active domains
-router.get("/:id", getDomainById); // GET /api/domain/:id
+/* ---------- PUBLIC ---------- */
+router.get("/", getDomains);
+router.get("/:id", getDomainById);
 
-/* ---------- ADMIN ROUTES ---------- */
-router.get("/admin/all", authenticateAdmin, getAllDomainsForAdmin); // GET /api/domain/admin/all
+/* ---------- ADMIN ---------- */
+router.get("/admin/all", authenticateAdmin, getAllDomainsForAdmin);
+
 router.post(
   "/",
   authenticateAdmin,
-  uploadDomainVideo.single("video"),
+  uploadDomainThumbnail.single("thumbnail"),
   createDomain
 );
 
 router.put(
   "/:id",
   authenticateAdmin,
-  uploadDomainVideo.single("video"),
+  uploadDomainThumbnail.single("thumbnail"),
   updateDomain
 );
 
