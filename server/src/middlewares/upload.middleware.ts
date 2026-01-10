@@ -173,36 +173,25 @@ export const uploadTechStackImage = multer({
 });
 
 
-const domainDir = "uploads/domains";
+const domainImageDir = "uploads/domains/thumbnails";
 
-// Ensure folder exists
-if (!fs.existsSync(domainDir)) {
-  fs.mkdirSync(domainDir, { recursive: true });
+if (!fs.existsSync(domainImageDir)) {
+  fs.mkdirSync(domainImageDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, domainDir);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${file.fieldname}${ext}`);
-  },
-});
-
-export const uploadDomainVideo = multer({
-  storage,
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
+export const uploadDomainThumbnail = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, domainImageDir),
+    filename: (_req, file, cb) => {
+      cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (_req, file, cb) => {
-    const allowed = /mp4|webm|ogg/;
-    const valid =
-      allowed.test(file.mimetype) &&
-      allowed.test(path.extname(file.originalname).toLowerCase());
-
-    if (!valid) {
-      return cb(new Error("Only video files allowed"));
-    }
-    cb(null, true);
+    const allowed = /jpeg|jpg|png|webp/;
+    allowed.test(file.mimetype)
+      ? cb(null, true)
+      : cb(new Error("Only image files allowed"));
   },
 });
 /* =====================================================

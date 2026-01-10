@@ -1,7 +1,7 @@
 import { Router } from "express";
 import heroRoutes from "./hero.routes";
 import domainRoutes from "./domain.routes";
-import faqChatRoutes from "./faqChat.routes"
+import faqChatRoutes from "./faq.routes"
 import enrollmentRequestRoutes from "./enrollmentRequest.routes"
 import enrollCardRoutes from "./enrollCard.routes";
 import aboutRoutes from "./about.routes";
