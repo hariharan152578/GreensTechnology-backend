@@ -19,6 +19,7 @@ import techStackRoutes from "./techStack.routes";
 import adminRoutes from "./admin.routes";
 import notice from "./notice.routes";
 import mail from "./mail.routes"
+import youtubeShortsRoutes from "./youtubeShortsVideos.routes";
 const router = Router();
 
 
@@ -42,4 +43,5 @@ router.use("/tech-stack", techStackRoutes);
 router.use("/admin", adminRoutes);
 router.use("/notices", notice);
 router.use("/mail",mail)
+router.use("/youtube-shorts", youtubeShortsRoutes);
 export default router;

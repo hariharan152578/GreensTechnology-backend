@@ -1,4 +1,5 @@
 import { Sequelize } from "sequelize-typescript";
+
 import { User } from "../models/User.model";
 import { Domain } from "../models/Domain.model";
 import { Course } from "../models/Course.model";
@@ -13,14 +14,16 @@ import { Certificate } from "../models/Certificate.model";
 import { Testimonial } from "../models/Testimonial.model";
 import { StudyMaterial } from "../models/StudyMaterial.model";
 import { StudentSuccess } from "../models/StudentSuccess.model";
-import {Module} from "../models/Module.model"
+import { Module } from "../models/Module.model";
 import { ModuleTopic } from "../models/ModuleTopic.model";
 import { Project } from "../models/Project.model";
 import { ProjectTech } from "../models/ProjectTech.model";
 import { VideoTestimonial } from "../models/VideoTestimonial.model";
 import { TechStack } from "../models/TechStack.model";
 import { Admin } from "../models/admin.model";
-import {Contact } from "../models/mail.model"
+import { Contact } from "../models/mail.model";
+import { YouTube_Shorts_videos } from "../models/YouTube_Shorts_videos.model";
+
 export const sequelize = new Sequelize({
   dialect: "mysql",
   host: process.env.DB_HOST || "localhost",
@@ -40,17 +43,18 @@ export const sequelize = new Sequelize({
     TrainerAbout,
     CareerImpact,
     Certificate,
-    Testimonial ,
+    Testimonial,
     StudyMaterial,
     StudentSuccess,
     ModuleTopic,
-    Module ,
+    Module,
     Project,
-
-  ProjectTech, 
-  VideoTestimonial,
-  TechStack,
-  Admin,Contact 
+    ProjectTech,
+    VideoTestimonial,
+    YouTube_Shorts_videos,
+    TechStack,
+    Admin,
+    Contact,
   ],
   logging: false,
 });

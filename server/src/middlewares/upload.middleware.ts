@@ -545,3 +545,31 @@ export const uploadEnrollmentProof = multer({
     cb(null, true);
   },
 });
+
+/* =====================================================
+   🎬 YOUTUBE SHORTS THUMBNAIL UPLOAD
+===================================================== */
+const youtubeShortsDir = "uploads/youtube-shorts-thumbnails";
+ensureDir(youtubeShortsDir);
+
+const youtubeShortsStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, youtubeShortsDir),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+  },
+});
+
+export const uploadYouTubeShortsThumbnail = multer({
+  storage: youtubeShortsStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = /jpg|jpeg|png|webp/;
+    const valid =
+      allowed.test(file.mimetype) &&
+      allowed.test(path.extname(file.originalname).toLowerCase());
+
+    if (!valid) return cb(new Error("Only image files allowed"));
+    cb(null, true);
+  },
+});

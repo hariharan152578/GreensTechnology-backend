@@ -2,12 +2,15 @@ import {
   Table,
   Column,
   Model,
-  DataType, // Keep DataType as it's used in the model
+  DataType,
 } from "sequelize-typescript";
 
-@Table({ tableName: "video_testimonials" })
-export class VideoTestimonial extends Model {
-  @Column({ primaryKey: true, autoIncrement: true })
+@Table({ tableName: "youtube_shorts_videos" })
+export class YouTube_Shorts_videos extends Model {
+  @Column({
+    primaryKey: true,
+    autoIncrement: true,
+  })
   id!: number;
 
   @Column
