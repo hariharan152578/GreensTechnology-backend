@@ -1,4 +1,3 @@
-// src/models/StudyMaterial.model.ts
 import { Table, Column, Model, DataType } from "sequelize-typescript";
 
 @Table({ tableName: "study_materials" })
@@ -24,9 +23,13 @@ export class StudyMaterial extends Model {
   @Column({ allowNull: false })
   highlight!: string;
 
-  // 🔥 STORED FILE PATH
+  /* 🔥 MAIN FILE PATH */
   @Column({ allowNull: false })
   filePath!: string;
+
+  /* 🖼️ NEW: THUMBNAIL IMAGE PATH */
+  @Column({ allowNull: true })
+  thumbnailPath!: string;
 
   @Column({ defaultValue: true })
   isActive!: boolean;

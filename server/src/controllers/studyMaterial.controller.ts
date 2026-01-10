@@ -65,7 +65,15 @@ export const getStudyMaterialById = async (req: Request, res: Response) => {
 /* ---------- CREATE STUDY MATERIAL ---------- */
 export const createStudyMaterial = async (req: Request, res: Response) => {
   try {
-    if (!req.file) {
+    const files = req.files as {
+      file?: Express.Multer.File[];
+      thumbnail?: Express.Multer.File[];
+    };
+
+    const file = files?.file?.[0];
+    const thumbnail = files?.thumbnail?.[0];
+
+    if (!file) {
       return res.status(400).json({ message: "File required" });
     }
 
@@ -73,28 +81,33 @@ export const createStudyMaterial = async (req: Request, res: Response) => {
       domainId: Number(req.body.domainId || 0),
       courseId: Number(req.body.courseId || 0),
       fileName: req.body.fileName,
-      description: req.body.description || '',
-      fileType: req.body.fileType || 'PDF',
+      description: req.body.description || "",
+      fileType: req.body.fileType || "PDF",
       highlight: req.body.highlight,
-      filePath: `/uploads/study-materials/${req.file.filename}`,
-      isActive: req.body.isActive === 'true' || req.body.isActive === true,
+      filePath: `/uploads/study-materials/${file.filename}`,
+      thumbnailPath: thumbnail
+        ? `/uploads/study-materials/thumbnails/${thumbnail.filename}`
+        : null,
+      isActive: req.body.isActive === "true" || req.body.isActive === true,
     });
 
     res.status(201).json({
+      success: true,
       message: "Study material created successfully",
-      material
+      material,
     });
   } catch (error: any) {
     console.error("STUDY MATERIAL CREATE ERROR:", error);
-    res.status(400).json({ 
+    res.status(400).json({
+      success: false,
       message: "Study material creation failed",
-      error: error.message 
+      error: error.message,
     });
   }
 };
 
+
 /* ---------- UPDATE STUDY MATERIAL ---------- */
-// Note: Add this if you want update functionality
 export const updateStudyMaterial = async (req: Request, res: Response) => {
   try {
     const material = await StudyMaterial.findByPk(req.params.id);
@@ -102,47 +115,79 @@ export const updateStudyMaterial = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Study material not found" });
     }
 
+    const files = req.files as {
+      file?: Express.Multer.File[];
+      thumbnail?: Express.Multer.File[];
+    };
+
+    const file = files?.file?.[0];
+    const thumbnail = files?.thumbnail?.[0];
+
     let updatedFilePath = material.filePath;
-    
-    if (req.file) {
-      // Delete old file
-      const oldFilename = material.filePath.split('/').pop();
-      if (oldFilename) {
-        const oldPath = path.join('uploads/study-materials', oldFilename);
-        if (fs.existsSync(oldPath)) {
-          fs.unlinkSync(oldPath);
+    let updatedThumbnailPath = material.thumbnailPath;
+
+    /* 🔄 MAIN FILE */
+    if (file) {
+      const old = material.filePath.split("/").pop();
+      if (old) {
+        const oldPath = path.join("uploads/study-materials", old);
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      }
+      updatedFilePath = `/uploads/study-materials/${file.filename}`;
+    }
+
+    /* 🖼️ THUMBNAIL */
+    if (thumbnail) {
+      if (material.thumbnailPath) {
+        const oldThumb = material.thumbnailPath.split("/").pop();
+        if (oldThumb) {
+          const oldThumbPath = path.join(
+            "uploads/study-materials/thumbnails",
+            oldThumb
+          );
+          if (fs.existsSync(oldThumbPath)) fs.unlinkSync(oldThumbPath);
         }
       }
-      updatedFilePath = `/uploads/study-materials/${req.file.filename}`;
+      updatedThumbnailPath = `/uploads/study-materials/thumbnails/${thumbnail.filename}`;
     }
 
     await material.update({
-      domainId: req.body.domainId !== undefined ? Number(req.body.domainId) : material.domainId,
-      courseId: req.body.courseId !== undefined ? Number(req.body.courseId) : material.courseId,
+      domainId:
+        req.body.domainId !== undefined
+          ? Number(req.body.domainId)
+          : material.domainId,
+      courseId:
+        req.body.courseId !== undefined
+          ? Number(req.body.courseId)
+          : material.courseId,
       fileName: req.body.fileName || material.fileName,
-      description: req.body.description !== undefined ? req.body.description : material.description,
+      description:
+        req.body.description !== undefined
+          ? req.body.description
+          : material.description,
       fileType: req.body.fileType || material.fileType,
       highlight: req.body.highlight || material.highlight,
       filePath: updatedFilePath,
-      isActive: req.body.isActive !== undefined 
-        ? (req.body.isActive === 'true' || req.body.isActive === true) 
-        : material.isActive,
+      thumbnailPath: updatedThumbnailPath,
+      isActive:
+        req.body.isActive !== undefined
+          ? req.body.isActive === "true" || req.body.isActive === true
+          : material.isActive,
     });
 
-    const updatedMaterial = await StudyMaterial.findByPk(req.params.id);
-    
     res.json({
       message: "Study material updated successfully",
-      material: updatedMaterial
+      material: await material.reload(),
     });
   } catch (error: any) {
     console.error("STUDY MATERIAL UPDATE ERROR:", error);
-    res.status(400).json({ 
+    res.status(400).json({
       message: "Study material update failed",
-      error: error.message 
+      error: error.message,
     });
   }
 };
+
 
 /* ---------- DELETE STUDY MATERIAL PERMANENTLY ---------- */
 export const deleteStudyMaterial = async (req: Request, res: Response) => {

@@ -445,36 +445,64 @@ export const mailUpload = multer({
 });
 
 /* =====================================================
-   📚 STUDY MATERIAL FILE UPLOAD
+   📚 STUDY MATERIAL FILE + THUMBNAIL UPLOAD
 ===================================================== */
-const materialDir = "uploads/study-materials";
-ensureDir(materialDir);
 
-const materialStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, materialDir),
+const studyMaterialDir = "uploads/study-materials";
+const thumbnailDir = "uploads/study-materials/thumbnails";
+
+ensureDir(studyMaterialDir);
+ensureDir(thumbnailDir);
+
+const studyMaterialStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (file.fieldname === "thumbnail") {
+      cb(null, thumbnailDir);
+    } else {
+      cb(null, studyMaterialDir);
+    }
+  },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);
-    const nameOnly = path.basename(file.originalname, ext).replace(/\s+/g, "_");
-    cb(null, `${Date.now()}-${nameOnly}${ext}`);
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
   },
 });
 
 export const uploadStudyMaterial = multer({
-  storage: materialStorage,
-  limits: { fileSize: 100 * 1024 * 1024 },
-  // FIX: Remove explicit 'Request' type to prevent conflict with browser types
-  // Multer's internal types will automatically apply the correct Express Request type
-  fileFilter: (req, file, cb) => {
-    const allowed = [".pdf", ".docx", ".doc", ".ppt", ".pptx", ".mp4", ".webm"];
-    const ext = path.extname(file.originalname).toLowerCase();
+  storage: studyMaterialStorage,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB
+  },
+  fileFilter: (_req, file, cb) => {
+    /* ✅ THUMBNAIL IMAGE */
+    if (file.fieldname === "thumbnail") {
+      const allowedImages = /jpg|jpeg|png|webp/;
+      const isValid =
+        allowedImages.test(file.mimetype) &&
+        allowedImages.test(path.extname(file.originalname).toLowerCase());
 
-    if (allowed.includes(ext)) {
-      cb(null, true);
-    } else {
-      cb(new Error("Unsupported file type") as any, false);
+      if (!isValid) {
+        return cb(new Error("Only image files allowed for thumbnail"));
+      }
+      return cb(null, true);
     }
+
+    /* ✅ STUDY MATERIAL FILE */
+    const allowedFiles =
+      /pdf|doc|docx|ppt|pptx|mp4|webm|avi|mov|epub|mobi/;
+
+    const isValid =
+      allowedFiles.test(file.mimetype) ||
+      allowedFiles.test(path.extname(file.originalname).toLowerCase());
+
+    if (!isValid) {
+      return cb(new Error("Unsupported file type"));
+    }
+
+    cb(null, true);
   },
 });
+
  /* =====================================================
    🎬 VIDEO TESTIMONIAL THUMBNAIL IMAGE UPLOAD
 ===================================================== */
